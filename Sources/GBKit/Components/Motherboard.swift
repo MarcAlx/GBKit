@@ -60,13 +60,12 @@ public class Motherboard: Clockable {
         if(self.isOn && self.hasCartridgeInserted) {
             var tmpCycles = 0
             while(tmpCycles < GBConstants.MCyclesPerFrame){
-                self.timer.tick(self.cycles, tmpCycles)
+                self.cpu.handleInterrupts()
                 self.cpu.tick(self.cycles, tmpCycles)
+                self.timer.tick(self.cycles, tmpCycles)
                 self.mmu.tick(self.cycles, tmpCycles)
                 self.ppu.tick(self.cycles, tmpCycles)
                 self.apu.tick(self.cycles, tmpCycles)
-                ////check interrupts
-                self.cpu.handleInterrupts()
                 self.tick(self.cycles, tmpCycles)
                 tmpCycles += GBConstants.MCycleLength
             }
