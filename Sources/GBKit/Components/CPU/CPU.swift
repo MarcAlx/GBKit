@@ -58,10 +58,6 @@ public class CPU: CPUImplementation, Clockable {
         }
     }
     
-    private func decode(opCode:OperationCode,instr:[Instruction]) -> Instruction {
-        return instr[Int(opCode.code)]
-    }
-    
     /// fetch an opcode from PC
     /// - returns a tuple with a bool that indicates if opcode is extended, and the fetched opcode
     private func fetch() -> (OperationCode,[Instruction]) {
@@ -71,6 +67,11 @@ public class CPU: CPUImplementation, Clockable {
             return ((true, self.readIncrPC()),extendedInstructionSet)
         }
         return ((false,opCode),standardInstructionSet)
+    }
+    
+    /// decode opcode using instruction array
+    private func decode(opCode:OperationCode,instr:[Instruction]) -> Instruction {
+        return instr[Int(opCode.code)]
     }
     
     /// execute an instruction and return the cycle it has consumed
