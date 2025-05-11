@@ -82,7 +82,7 @@ _n.b 1 M cycle = 4 T cycles_
 Passing : 
 
  - 01-special.gb
-- 02-interrupts.gb
+ - 02-interrupts.gb
  - 03-op sp,hl.gb
  - 04-op r,imm.gb
  - 05-op rp.gb
@@ -124,7 +124,7 @@ Passing :
 This repo is compliant with [gameboy doctor](https://github.com/robert/gameboy-doctor) for the following roms [found here](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs):
 
  - 01-special.gb
- - 02-special.gb
+ - 02-interrupts.gb
  - 03-op sp,hl.gb
  - 04-op r,imm.gb
  - 05-op rp.gb
