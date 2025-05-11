@@ -82,6 +82,7 @@ _n.b 1 M cycle = 4 T cycles_
 Passing : 
 
  - 01-special.gb
+- 02-interrupts.gb
  - 03-op sp,hl.gb
  - 04-op r,imm.gb
  - 05-op rp.gb
@@ -91,10 +92,6 @@ Passing :
  - 09-op r,r.gb
  - 10-bit ops.gb
  - 11-op a,(hl).gb
-
- Non passing :
-
- - 02-interrupts.gb
 
  #### PPU
 
@@ -127,6 +124,7 @@ Passing :
 This repo is compliant with [gameboy doctor](https://github.com/robert/gameboy-doctor) for the following roms [found here](https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs):
 
  - 01-special.gb
+ - 02-special.gb
  - 03-op sp,hl.gb
  - 04-op r,imm.gb
  - 05-op rp.gb
@@ -141,7 +139,7 @@ The following rom still needs to be compliant:
 
 - 02-interrupts.gb
 
-_n.b Some initialization are required in order to be compliant with this tool (set F to 0xB0, MMU must return to 0x90 for LY (0xFF44), CPU must log at each instruction via cpu.registers.describe())_
+_n.b Some initialization are required in order to be compliant with this tool (set F to 0xB0, MMU must return to 0x90 for LY (0xFF44), CPU must log at each instruction via cpu.registers.describe())_ (see branch /dev/gb_doc)
 
 ### Unit test
 
