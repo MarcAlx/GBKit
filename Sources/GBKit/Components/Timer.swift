@@ -37,6 +37,7 @@ public class Timer : Component, Clockable {
     private let mmu:MMU
     private let interrupts:InterruptsControlInterface
     private var overflowPending = false
+    private var mCycleOverflowCount = 0
     
     public init(mmu: MMU) {
         self.mmu = mmu
@@ -64,15 +65,20 @@ public class Timer : Component, Clockable {
         
         let tacEnabled:Bool = isBitSet(.Bit_2, self.mmu[IOAddresses.TAC.rawValue])
         
-        
         //we have wait 1 cycle during overflow -> trigger interrup
         if(overflowPending){
-            //timer modulo
-            self.mmu.TIMA = self.mmu.TMA
-            //trigger interrupt
-            self.interrupts.setInterruptFlagValue(.Timer, true)
-            //reset
-            self.overflowPending = false
+            self.mCycleOverflowCount += 1
+            //one cycle should pass before triggering interrupt
+            if(self.mCycleOverflowCount == 2){
+                //timer modulo
+                self.mmu.TIMA = self.mmu.TMA
+                //trigger interrupt
+                self.interrupts.setInterruptFlagValue(.Timer, true)
+                //reset
+                self.overflowPending = false
+                //
+                self.mCycleOverflowCount = 0
+            }
         }
         
         //tac enabled and edge bit has fallen (from 1 to 0)
