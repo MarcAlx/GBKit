@@ -1,5 +1,25 @@
 import Foundation
 
+/// 16bit/Short mask to extract/check bit
+enum ShortMask: Short {
+    case Bit_15 = 0b1000_0000_0000_0000
+    case Bit_14 = 0b0100_0000_0000_0000
+    case Bit_13 = 0b0010_0000_0000_0000
+    case Bit_12 = 0b0001_0000_0000_0000
+    case Bit_11 = 0b0000_1000_0000_0000
+    case Bit_10 = 0b0000_0100_0000_0000
+    case Bit_9  = 0b0000_0010_0000_0000
+    case Bit_8  = 0b0000_0001_0000_0000
+    case Bit_7  = 0b0000_0000_1000_0000
+    case Bit_6  = 0b0000_0000_0100_0000
+    case Bit_5  = 0b0000_0000_0010_0000
+    case Bit_4  = 0b0000_0000_0001_0000
+    case Bit_3  = 0b0000_0000_0000_1000
+    case Bit_2  = 0b0000_0000_0000_0100
+    case Bit_1  = 0b0000_0000_0000_0010
+    case Bit_0  = 0b0000_0000_0000_0001
+}
+
 /// 8bit/byte mask to extract/check bit
 enum ByteMask: Byte {
     case Bit_7 = 0b1000_0000
@@ -120,8 +140,18 @@ func fit(_ i:Int) -> Short {
 }
 
 /// true if bit identified by mask is 1 in val
+func isBitSet(_ mask:ShortMask,_ val:Short) -> Bool {
+    return (val & mask.rawValue) > 0
+}
+
+/// true if bit identified by mask is 1 in val
 func isBitSet(_ mask:ByteMask,_ val:Byte) -> Bool {
     return (val & mask.rawValue) > 0
+}
+
+/// true if bit identified by mask is 0 in val
+func isBitCleared(_ mask:ShortMask,_ val:Short) -> Bool {
+    return (val & mask.rawValue) == 0
 }
 
 /// true if bit identified by mask is 0 in val
