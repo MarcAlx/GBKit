@@ -63,8 +63,8 @@ public struct GameBoyConstants {
     //opcode to lookup for extended instructions
     public let ExtentedInstructionSetOpcode:Byte = 0xCB
     
-    //Div timer frequency in T cycle
-    public let DivTimerFrequency:Int = 64;
+    //Div timer frequency in T cycle, (DIV increments at 16384Hz so 4194304 (T) / 16384 (T) = 256 (T)
+    public let DivTimerFrequency:Int = 256;
     
     //APU frame sequencer frequency, 512hz
     public let APUFrameSequencerFrequency:Int = 512

@@ -210,10 +210,18 @@ public class MMU: MMUCore, InterruptsControlInterface,
     }
     
     // mark: TimerInterface
+    public var INTERNAL_DIV_COUNTER: Short {
+        set {
+            self.internalDivCounter = newValue
+        }
+        get {
+            return self.internalDivCounter
+        }
+    }
     
     public var DIV: Byte {
         get {
-            return self.read(address: IOAddresses.DIV.rawValue)
+            return self.internalDivCounterAsByte
         }
     }
     

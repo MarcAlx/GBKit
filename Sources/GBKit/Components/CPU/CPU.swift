@@ -58,10 +58,6 @@ public class CPU: CPUImplementation, Clockable {
         }
     }
     
-    private func decode(opCode:OperationCode,instr:[Instruction]) -> Instruction {
-        return instr[Int(opCode.code)]
-    }
-    
     /// fetch an opcode from PC
     /// - returns a tuple with a bool that indicates if opcode is extended, and the fetched opcode
     private func fetch() -> (OperationCode,[Instruction]) {
@@ -71,6 +67,11 @@ public class CPU: CPUImplementation, Clockable {
             return ((true, self.readIncrPC()),extendedInstructionSet)
         }
         return ((false,opCode),standardInstructionSet)
+    }
+    
+    /// decode opcode using instruction array
+    private func decode(opCode:OperationCode,instr:[Instruction]) -> Instruction {
+        return instr[Int(opCode.code)]
     }
     
     /// execute an instruction and return the cycle it has consumed
@@ -106,8 +107,15 @@ public class CPU: CPUImplementation, Clockable {
     
     /// poll and trigger interrupts by priority
     public func handleInterrupts() {
+        let pendingInterrupts = self.interrupts.IE > 0 && self.interrupts.IF > 0
+            
+        //if halted with an interrupt -> go back to running
+        if(self.state == .HALTED && pendingInterrupts) {
+            self.state = .RUNNING
+        }
+        
         //handle interrupt only if not just enabled (cpu should wait one op on ei()), IME, enabled, flagged
-        if(!self.interruptsJustEnabled && self.interrupts.IME && self.interrupts.IE > 0 && self.interrupts.IF > 0){
+        if(!self.interruptsJustEnabled && self.interrupts.IME && pendingInterrupts){
             //check interrupt following IE, IF corresponding bit order, 0 VBLANK -> 4 Joypad
             if(self.interrupts.isInterruptEnabled(.VBlank) && self.interrupts.isInterruptFlagged(.VBlank)){
                 self.handleInterrupt(.VBlank, ReservedMemoryLocationAddresses.INTERRUPT_VBLANK.rawValue)

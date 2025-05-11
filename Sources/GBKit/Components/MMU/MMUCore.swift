@@ -24,6 +24,16 @@ public class MMUCore:Component, Clockable {
         }
     }
     
+    /// used to compute div (16bits but exposed as 8bits)
+    var internalDivCounter:Short = 0;
+    
+    ///ease access to internal div counter when byte value is needed
+    var internalDivCounterAsByte:Byte {
+        get {
+            return Byte(self.internalDivCounter >> 8)//DIV is only 8 upper bits
+        }
+    }
+    
     ///stores current buttons state, should be updated by JoyPad
     var buttonsState:Byte = 0
     
@@ -70,6 +80,9 @@ public class MMUCore:Component, Clockable {
                 }
             case IOAddresses.LCD_STATUS.rawValue:
                 return self.ram[address] | 0b1000_0000 //bit 7 is always 1
+            //DIV is mapped to internal div counter
+            case IOAddresses.DIV.rawValue:
+                return self.internalDivCounterAsByte
             //prohibited area, always return 0
             case MMUAddressSpaces.PROHIBITED_AREA:
                 return 0x00
@@ -116,6 +129,7 @@ public class MMUCore:Component, Clockable {
             //writing to DIV resets it to 0x00
             case IOAddresses.DIV.rawValue:
                 self.ram[address] = 0;
+                self.internalDivCounter = 0
                 break;
             //LCD status first three bits are read only
             case IOAddresses.LCD_STATUS.rawValue:
