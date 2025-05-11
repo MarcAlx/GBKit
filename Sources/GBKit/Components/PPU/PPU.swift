@@ -260,7 +260,7 @@ public class PPU: Component, Clockable {
                 self.drawPixelAt(x: destx, y: desty, withColor: effectiveColor)
                 
                 //store pixel type
-                self.bgWinColorIndexes[Int(destx)][Int(desty)] = colorIndex
+                //self.bgWinColorIndexes[Int(destx)][Int(desty)] = colorIndex
             }
             
             //update line counter
@@ -361,10 +361,10 @@ public class PPU: Component, Clockable {
         let dest:Int = (((Int(y) * GBConstants.ScreenWidth) + Int(x)) * 4)
         
         //draw color to frame buffer
-        self.nextFrame[dest]   = withColor.r //r
-        self.nextFrame[dest+1] = withColor.g //g
-        self.nextFrame[dest+2] = withColor.b //b
-        self.nextFrame[dest+3] = 0xFF        //a
+      //  self.nextFrame[dest]   = withColor.r //r
+      //  self.nextFrame[dest+1] = withColor.g //g
+      //  self.nextFrame[dest+2] = withColor.b //b
+      //  self.nextFrame[dest+3] = 0xFF        //a
     }
     
     ///lists obj tiles:

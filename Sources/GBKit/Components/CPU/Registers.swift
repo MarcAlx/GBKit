@@ -84,7 +84,7 @@ class Registers: Component,Describable {
     func reset() {
         //same as DMG, @see: https://gbdev.io/pandocs/Power_Up_Sequence.html
         self.A = 0x01
-        self.F = 0b1000_0000//ony Z set
+        self.F = 0xB0// 0b1000_0000//ony Z set
         self.B = 0x00
         self.C = 0x13
         self.D = 0x00

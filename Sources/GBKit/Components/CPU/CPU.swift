@@ -54,7 +54,7 @@ public class CPU: CPUImplementation, Clockable {
             //execute
             let duration = self.execute(instruction: instruction)
             self.cycles = self.cycles &+ duration
-            //print(self.registers.describe())
+            print(self.registers.describe())
         }
     }
     
