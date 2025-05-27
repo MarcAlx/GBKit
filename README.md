@@ -135,10 +135,6 @@ This repo is compliant with [gameboy doctor](https://github.com/robert/gameboy-d
  - 10-bit ops.gb
  - 11-op a,(hl).gb
 
-The following rom still needs to be compliant: 
-
-- 02-interrupts.gb
-
 _n.b Some initialization are required in order to be compliant with this tool (set F to 0xB0, MMU must return to 0x90 for LY (0xFF44), CPU must log at each instruction via cpu.registers.describe())_ (see branch /dev/gb_doc)
 
 ### Unit test
