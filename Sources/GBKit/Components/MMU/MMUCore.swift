@@ -162,7 +162,7 @@ public class MMUCore:Component, Clockable {
                 self.ram[address] = newValue
                 break
             //only bit 7 of NR52 is R/W
-            case IOAddresses.AUDIO_NR41.rawValue:
+            case IOAddresses.AUDIO_NR52.rawValue:
                 self.ram[address] = self.ram[address] & NegativeByteMask.Bit_7.rawValue // clear actual bit 7
                                   | newValue & ByteMask.Bit_7.rawValue                  // keep only bit 7 of new value
                 break
