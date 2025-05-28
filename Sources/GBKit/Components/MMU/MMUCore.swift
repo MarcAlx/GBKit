@@ -89,6 +89,32 @@ public class MMUCore:Component, Clockable {
             //mirror C000-DDFF (which is 0x2000 behind)
             case MMUAddressSpaces.ECHO_RAM:
                 return self.ram[address-0x2000]
+            case IOAddresses.AUDIO_NR10.rawValue:
+                return self.ram[address] | 0b1000_0000; //bit 7 is not readable
+            case IOAddresses.AUDIO_NR11.rawValue,
+                 IOAddresses.AUDIO_NR21.rawValue:
+                return self.ram[address] | 0b0011_1111; //only bits 7 6 are readable
+            case IOAddresses.AUDIO_NR13.rawValue,
+                 IOAddresses.AUDIO_NR23.rawValue,
+                 IOAddresses.AUDIO_NR31.rawValue,
+                 IOAddresses.AUDIO_NR33.rawValue,
+                 IOAddresses.AUDIO_NR41.rawValue:
+                return 0xFF //write-only
+            case 0xFF15 /*non exitsting NR15*/,
+                 0xFF1F /*non exitsting NR35*/,
+                 0xFF27...IOAddresses.AUDIO_WAVE_PATTERN_RAM.rawValue-1: /*unused after all NRXX to start of wav ram*/
+                return 0xFF //doesn't exists so return 0xFF
+            case IOAddresses.AUDIO_NR30.rawValue:
+                return self.ram[address] | 0b0111_1111; //only bit 7 is readable
+            case IOAddresses.AUDIO_NR32.rawValue:
+                return self.ram[address] | 0b1001_1111; //only bits 6 5 are readable
+            case IOAddresses.AUDIO_NR52.rawValue:
+                return self.ram[address] | 0b0111_0000; //bits 6 5 4 are always 1 on read
+            case IOAddresses.AUDIO_NR14.rawValue,
+                 IOAddresses.AUDIO_NR24.rawValue,
+                 IOAddresses.AUDIO_NR34.rawValue,
+                 IOAddresses.AUDIO_NR44.rawValue:
+                return self.ram[address] | 0b1011_1111; //only bit 6 is readable
             //set ram value
             default:
                 return self.ram[address]
