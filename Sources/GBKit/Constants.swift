@@ -609,6 +609,8 @@ public enum IOAddresses:Short {
     case AUDIO_NR51 = 0xFF25
     case AUDIO_NR52 = 0xFF26
     
+    //FF27 to WAVE ram -> unused
+    
     //wav ram
     case AUDIO_WAVE_PATTERN_RAM     = 0xFF30
     case AUDIO_WAVE_PATTERN_RAM_END = 0xFF3F

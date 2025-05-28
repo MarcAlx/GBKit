@@ -102,7 +102,7 @@ public class MMUCore:Component, Clockable {
                 return 0xFF //write-only
             case 0xFF15 /*non exitsting NR15*/,
                  0xFF1F /*non exitsting NR35*/,
-                 0xFF27...IOAddresses.AUDIO_WAVE_PATTERN_RAM.rawValue-1: /*unused after all NRXX to start of wav ram*/
+                 0xFF27...IOAddresses.AUDIO_WAVE_PATTERN_RAM.rawValue-1: /*unused after all NRXX to start of wave ram*/
                 return 0xFF //doesn't exists so return 0xFF
             case IOAddresses.AUDIO_NR30.rawValue:
                 return self.ram[address] | 0b0111_1111; //only bit 7 is readable
