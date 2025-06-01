@@ -43,6 +43,9 @@ public class MMUCore:Component, Clockable {
     ///length timers for each APU channels, holds inside MMU to avoid having an APU reference inside MMU
     var lengthTimers:[Int] = GBConstants.DefaultLengthTimer
 
+    //to interract with MMU
+    var apuProxy:APUProxy = DefaultAPUProxy()
+    
     public init(){
     }
     
@@ -169,22 +172,22 @@ public class MMUCore:Component, Clockable {
                 break
             //updating NR11 must init length timer for channel 1
             case IOAddresses.AUDIO_NR11.rawValue:
-                self.initLengthTimer(AudioChannelId.CH1, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH1, newValue)
                 self.ram[address] = newValue
                 break
             //updating NR21 must init length timer for channel 2
             case IOAddresses.AUDIO_NR21.rawValue:
-                self.initLengthTimer(AudioChannelId.CH2, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH2, newValue)
                 self.ram[address] = newValue
                 break
                 //updating NR31 must init length timer for channel 3
             case IOAddresses.AUDIO_NR31.rawValue:
-                self.initLengthTimer(AudioChannelId.CH3, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH3, newValue)
                 self.ram[address] = newValue
                 break
             //updating NR41 must init length timer for channel 4
             case IOAddresses.AUDIO_NR41.rawValue:
-                self.initLengthTimer(AudioChannelId.CH4, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH4, newValue)
                 self.ram[address] = newValue
                 break
             //only bit 7 of NR52 is R/W
@@ -289,14 +292,5 @@ public class MMUCore:Component, Clockable {
         self.ram[MMUAddressSpacesInt.OBJECT_ATTRIBUTE_MEMORY] = self.ram[sourceRange]
         self.dmaCounter = GBConstants.DMADuration
         self.currentDMATransferRange = sourceRange
-    }
-    
-    /// initis length timer for a given channel using value from an NRX1 register
-    private func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte){
-        //get channel index
-        let chIdx:Int = AudioChannelId.CH1.rawValue;
-        //timer is set to Default values minus masked part of nrx1 value
-        self.lengthTimers[chIdx] = GBConstants.DefaultLengthTimer[chIdx]
-                                 - Int((nrx1Value & GBConstants.NRX1_lengthMask[chIdx]))
     }
 }

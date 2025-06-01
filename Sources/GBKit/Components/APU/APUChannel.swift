@@ -15,6 +15,9 @@ public protocol APUChannel: Component, Clockable {
 
 /// channel that supports length control
 public protocol LengthableChannel {
+    /// timer for length
+    var lengthTimer:Int {get}
+    
     /// tick length
     func tickLength()
 }

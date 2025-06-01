@@ -294,18 +294,6 @@ public class MMU: MMUCore, InterruptsControlInterface,
         self.write(address: GBConstants.PeriodRegisters[channel.rawValue], val: val)
     }
     
-    public func getLengthTimer(_ channel:AudioChannelId) -> Int {
-        return self.lengthTimers[channel.rawValue]
-    }
-
-    public func resetLengthTimer(_ channel:AudioChannelId) {
-        self.lengthTimers[channel.rawValue] = GBConstants.DefaultLengthTimer[channel.rawValue]
-    }
-    
-    public func decrementLengthTimer(_ channel:AudioChannelId) {
-        self.lengthTimers[channel.rawValue] -= 1
-    }
-    
     public func isLengthEnabled(_ channel:AudioChannelId) -> Bool {
         return isBitSet(ByteMask.Bit_6, self.directRead(address: GBConstants.AudioChannelControlRegisters[channel.rawValue]))
     }
@@ -401,5 +389,9 @@ public class MMU: MMUCore, InterruptsControlInterface,
         var master = self[IOAddresses.AUDIO_NR50.rawValue];
         return (L:(master & 0b1000_0000) > 0,
                 R:(master & 0b0000_1000) > 0)
+    }
+    
+    public func registerAPU(apu: APUProxy) {
+        self.apuProxy = apu
     }
 }
