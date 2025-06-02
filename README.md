@@ -103,10 +103,9 @@ Passing :
 
   Passing :
   
-  - None
+  - 01-registers.gb 
 
   Non passing :
-  - 01-registers.gb 
   - 02-len ctr.gb 
   - 03-trigger.gb 
   - 04-sweep.gb 
