@@ -137,6 +137,12 @@ public class MMUCore:Component, Clockable {
                 return
             }
             
+            //prevent writes to audio registers if APU is disabled
+            if(!self.apuProxy.isAPUEnabled
+            && MMUAddressSpaces.AUDIO_REGISTERS.contains(address)) {
+                return
+            }
+            
             switch address {
             //mirror C000-DDFF (which is 0x2000 behind)
             case MMUAddressSpaces.ECHO_RAM:
