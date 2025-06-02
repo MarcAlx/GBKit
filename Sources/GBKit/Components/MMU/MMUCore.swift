@@ -43,6 +43,9 @@ public class MMUCore:Component, Clockable {
     ///length timers for each APU channels, holds inside MMU to avoid having an APU reference inside MMU
     var lengthTimers:[Int] = GBConstants.DefaultLengthTimer
 
+    //to interract with MMU
+    var apuProxy:APUProxy = DefaultAPUProxy()
+    
     public init(){
     }
     
@@ -89,6 +92,39 @@ public class MMUCore:Component, Clockable {
             //mirror C000-DDFF (which is 0x2000 behind)
             case MMUAddressSpaces.ECHO_RAM:
                 return self.ram[address-0x2000]
+            case IOAddresses.AUDIO_NR10.rawValue:
+                return self.ram[address] | 0b1000_0000; //bit 7 is not readable
+            case IOAddresses.AUDIO_NR11.rawValue,
+                 IOAddresses.AUDIO_NR21.rawValue:
+                return self.ram[address] | 0b0011_1111; //only bits 7 6 are readable
+            case IOAddresses.AUDIO_NR13.rawValue,
+                 IOAddresses.AUDIO_NR23.rawValue,
+                 IOAddresses.AUDIO_NR31.rawValue,
+                 IOAddresses.AUDIO_NR33.rawValue,
+                 IOAddresses.AUDIO_NR41.rawValue:
+                return 0xFF //write-only
+            case 0xFF15 /*non exitsting NR15*/,
+                 0xFF1F /*non exitsting NR35*/,
+                 0xFF27...IOAddresses.AUDIO_WAVE_PATTERN_RAM.rawValue-1: /*unused after all NRXX to start of wave ram*/
+                return 0xFF //doesn't exists so return 0xFF
+            case IOAddresses.AUDIO_NR30.rawValue:
+                return self.ram[address] | 0b0111_1111; //only bit 7 is readable
+            case IOAddresses.AUDIO_NR32.rawValue:
+                return self.ram[address] | 0b1001_1111; //only bits 6 5 are readable
+            case IOAddresses.AUDIO_NR52.rawValue:
+                return self.ram[address]
+                     & 0b1000_0000 //only bit 7 is writable
+                     | 0b0111_0000 //bits 6 5 4 are always 1 on read
+                     //bits 3 2 1 0 depends on channel state
+                     | (self.apuProxy.isCH4Enabled ? 0b0000_1000 : 0)
+                     | (self.apuProxy.isCH3Enabled ? 0b0000_0100 : 0)
+                     | (self.apuProxy.isCH2Enabled ? 0b0000_0010 : 0)
+                     | (self.apuProxy.isCH1Enabled ? 0b0000_0001 : 0);
+            case IOAddresses.AUDIO_NR14.rawValue,
+                 IOAddresses.AUDIO_NR24.rawValue,
+                 IOAddresses.AUDIO_NR34.rawValue,
+                 IOAddresses.AUDIO_NR44.rawValue:
+                return self.ram[address] | 0b1011_1111; //only bit 6 is readable
             //set ram value
             default:
                 return self.ram[address]
@@ -98,6 +134,12 @@ public class MMUCore:Component, Clockable {
             //during DMA transfer conflicts occurs if transfer dest (always OAM) is accessed while being wrote
             if(self.isDMATransferInProgress
             && MMUAddressSpaces.OBJECT_ATTRIBUTE_MEMORY.contains(address)) {
+                return
+            }
+            
+            //prevent writes to audio registers if APU is disabled
+            if(!self.apuProxy.isAPUEnabled
+            && MMUAddressSpaces.AUDIO_REGISTERS.contains(address)) {
                 return
             }
             
@@ -143,28 +185,49 @@ public class MMUCore:Component, Clockable {
                 break
             //updating NR11 must init length timer for channel 1
             case IOAddresses.AUDIO_NR11.rawValue:
-                self.initLengthTimer(AudioChannelId.CH1, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH1, newValue)
                 self.ram[address] = newValue
                 break
             //updating NR21 must init length timer for channel 2
             case IOAddresses.AUDIO_NR21.rawValue:
-                self.initLengthTimer(AudioChannelId.CH2, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH2, newValue)
                 self.ram[address] = newValue
                 break
                 //updating NR31 must init length timer for channel 3
             case IOAddresses.AUDIO_NR31.rawValue:
-                self.initLengthTimer(AudioChannelId.CH3, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH3, newValue)
                 self.ram[address] = newValue
                 break
             //updating NR41 must init length timer for channel 4
             case IOAddresses.AUDIO_NR41.rawValue:
-                self.initLengthTimer(AudioChannelId.CH4, newValue)
+                self.apuProxy.initLengthTimer(AudioChannelId.CH4, newValue)
                 self.ram[address] = newValue
                 break
             //only bit 7 of NR52 is R/W
-            case IOAddresses.AUDIO_NR41.rawValue:
+            case IOAddresses.AUDIO_NR52.rawValue:
+                let bit7Val = newValue & ByteMask.Bit_7.rawValue
                 self.ram[address] = self.ram[address] & NegativeByteMask.Bit_7.rawValue // clear actual bit 7
-                                  | newValue & ByteMask.Bit_7.rawValue                  // keep only bit 7 of new value
+                                  | bit7Val                                             // keep only bit 7 of new value
+                let willEnable = bit7Val > 0
+                
+                //apu is enabled and will disable
+                if(self.apuProxy.isAPUEnabled && !willEnable) {
+                    //turn off all channel
+                    self.apuProxy.isCH1Enabled = false;
+                    self.apuProxy.isCH2Enabled = false;
+                    self.apuProxy.isCH3Enabled = false;
+                    self.apuProxy.isCH4Enabled = false;
+                    //disabling should clear all audio registers except NR52
+                    for addr in MMUAddressSpaces.AUDIO_REGISTERS {
+                        self.ram[addr] = 0
+                    }
+                }
+                //apu is disabled and will enabled
+                else if(!self.apuProxy.isAPUEnabled && willEnable) {
+                    //this doesn't enable all channel, it's up to developper to re-enable each
+                }
+                //notify enable
+                self.apuProxy.isAPUEnabled = willEnable
                 break
             //default to ram
             default:
@@ -263,14 +326,5 @@ public class MMUCore:Component, Clockable {
         self.ram[MMUAddressSpacesInt.OBJECT_ATTRIBUTE_MEMORY] = self.ram[sourceRange]
         self.dmaCounter = GBConstants.DMADuration
         self.currentDMATransferRange = sourceRange
-    }
-    
-    /// initis length timer for a given channel using value from an NRX1 register
-    private func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte){
-        //get channel index
-        let chIdx:Int = AudioChannelId.CH1.rawValue;
-        //timer is set to Default values minus masked part of nrx1 value
-        self.lengthTimers[chIdx] = GBConstants.DefaultLengthTimer[chIdx]
-                                 - Int((nrx1Value & GBConstants.NRX1_lengthMask[chIdx]))
     }
 }

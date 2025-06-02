@@ -4,7 +4,7 @@ public protocol APUChannel: Component, Clockable {
     var amplitude:Byte { get }
     
     /// true if enabled
-    var enabled:Bool { get }
+    var enabled:Bool { get set }
     
     ///channel id
     var id:AudioChannelId { get }
@@ -15,6 +15,9 @@ public protocol APUChannel: Component, Clockable {
 
 /// channel that supports length control
 public protocol LengthableChannel {
+    /// timer for length
+    var lengthTimer:Int {get}
+    
     /// tick length
     func tickLength()
 }

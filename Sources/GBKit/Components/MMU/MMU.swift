@@ -280,12 +280,12 @@ public class MMU: MMUCore, InterruptsControlInterface,
     
     public func getDutyPattern(_ channel:DutyAudioChannelId) -> Byte {
         //only upper 2 bits of NR{1|2}1 (then shifted get value 0, 1, 2, 3)
-        return (self[GBConstants.WaveDutyRegisters[channel.rawValue]] & 0b1100_0000) >> 6
+        return (self.directRead(address: GBConstants.WaveDutyRegisters[channel.rawValue]) & 0b1100_0000) >> 6
     }
     
     public func getPeriod(_ channel:ChannelWithPeriodId) -> Short {
         //extract 16bits starting from NR{1|2|3}3 (thus overlaping NR{1|2|3}4)
-        let val:Short = self.read(address: GBConstants.PeriodRegisters[channel.rawValue])
+        let val:Short = self.directRead(address: GBConstants.PeriodRegisters[channel.rawValue])
         //keep 3bits of NR{1|2|3}4 and 8bits of NR{1|2|3}3
         return val & 0b00000111_11111111
     }
@@ -294,52 +294,33 @@ public class MMU: MMUCore, InterruptsControlInterface,
         self.write(address: GBConstants.PeriodRegisters[channel.rawValue], val: val)
     }
     
-    public func getLengthTimer(_ channel:AudioChannelId) -> Int {
-        return self.lengthTimers[channel.rawValue]
-    }
-
-    public func resetLengthTimer(_ channel:AudioChannelId) {
-        self.lengthTimers[channel.rawValue] = GBConstants.DefaultLengthTimer[channel.rawValue]
-    }
-    
-    public func decrementLengthTimer(_ channel:AudioChannelId) {
-        self.lengthTimers[channel.rawValue] -= 1
-    }
-    
     public func isLengthEnabled(_ channel:AudioChannelId) -> Bool {
-        return isBitSet(ByteMask.Bit_6, self[GBConstants.AudioChannelControlRegisters[channel.rawValue]])
+        return isBitSet(ByteMask.Bit_6, self.directRead(address: GBConstants.AudioChannelControlRegisters[channel.rawValue]))
     }
     
     public func isTriggered(_ channel:AudioChannelId) -> Bool {
-       return isBitSet(ByteMask.Bit_7, self[GBConstants.AudioChannelControlRegisters[channel.rawValue]])
+       return isBitSet(ByteMask.Bit_7, self.directRead(address: GBConstants.AudioChannelControlRegisters[channel.rawValue]))
     }
     
     public func resetTrigger(_ channel:AudioChannelId) {
         let addr:Short = GBConstants.AudioChannelControlRegisters[channel.rawValue]
         //clear trigger bit
-        self[addr] = self[addr] & NegativeByteMask.Bit_7.rawValue
-    }
-    
-    public func setAudioChannelState(_ channel:AudioChannelId, enabled:Bool) {
-        let actualValue = self[IOAddresses.AUDIO_NR52.rawValue];
-        let newVal:Byte = enabled ? actualValue |  (1 << channel.rawValue) //set concerned bit to 1
-                                  : actualValue & ~(1 << channel.rawValue) //keep every bits but concerned one
-        self[IOAddresses.AUDIO_NR52.rawValue] = newVal
+        self[addr] = self.directRead(address: addr) & NegativeByteMask.Bit_7.rawValue
     }
     
     ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
     public func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return (self[GBConstants.EnvelopeControlRegisters[channel.rawValue]] & 0b0000_1000) >> 3;
+        return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_1000) >> 3;
     }
     
     ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
     public func getEnvelopeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return self[GBConstants.EnvelopeControlRegisters[channel.rawValue]] & 0b0000_0111;
+        return self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_0111;
     }
     
     ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
     public func getEnvelopeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return (self[GBConstants.EnvelopeControlRegisters[channel.rawValue]] & 0b1111_0000) >> 4;
+        return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b1111_0000) >> 4;
     }
     
     public func getSweepPace() -> Byte {
@@ -401,5 +382,9 @@ public class MMU: MMUCore, InterruptsControlInterface,
         var master = self[IOAddresses.AUDIO_NR50.rawValue];
         return (L:(master & 0b1000_0000) > 0,
                 R:(master & 0b0000_1000) > 0)
+    }
+    
+    public func registerAPU(apu: APUProxy) {
+        self.apuProxy = apu
     }
 }

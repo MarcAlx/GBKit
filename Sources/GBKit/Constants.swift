@@ -548,6 +548,7 @@ public enum MMUAddressSpaces {
     static let PROHIBITED_AREA = MMUAddresses.PROHIBITED_AREA.rawValue...MMUAddresses.PROHIBITED_AREA_END.rawValue
     static let OBJECT_ATTRIBUTE_MEMORY:ClosedRange<Short> = MMUAddresses.OBJECT_ATTRIBUTE_MEMORY.rawValue...MMUAddresses.OBJECT_ATTRIBUTE_MEMORY_END.rawValue
     static let IO_REGISTERS = MMUAddresses.IO_REGISTERS.rawValue...MMUAddresses.IO_REGISTERS_END.rawValue
+    static let AUDIO_REGISTERS = IOAddresses.AUDIO_NR10.rawValue...IOAddresses.AUDIO_NR51.rawValue
     static let WAVE_RAM = MMUAddresses.WAVE_RAM.rawValue...MMUAddresses.WAVE_RAM_END.rawValue
     static let HIGH_RAM:ClosedRange<Short> = MMUAddresses.HIGH_RAM.rawValue...MMUAddresses.HIGH_RAM_END.rawValue
     static let WINDOW_TILE_MAP_AREA_0:ClosedRange<Short> = 0x9800...0x9BFF
@@ -581,6 +582,7 @@ public enum IOAddresses:Short {
     case AUDIO_NR12 = 0xFF12
     case AUDIO_NR13 = 0xFF13
     case AUDIO_NR14 = 0xFF14
+    //no FF15
     
     //Channel 2
     //no NR20 in channel 2 as it has no sweep
@@ -595,6 +597,7 @@ public enum IOAddresses:Short {
     case AUDIO_NR32 = 0xFF1C
     case AUDIO_NR33 = 0xFF1D
     case AUDIO_NR34 = 0xFF1E
+    //no FF1F
     
     //Channel 4
     case AUDIO_NR41 = 0xFF20
@@ -602,12 +605,16 @@ public enum IOAddresses:Short {
     case AUDIO_NR43 = 0xFF22
     case AUDIO_NR44 = 0xFF23
     
-    case AUDIO_WAVE_PATTERN_RAM     = 0xFF30
-    case AUDIO_WAVE_PATTERN_RAM_END = 0xFF3F
-    
+    //controls
     case AUDIO_NR50 = 0xFF24
     case AUDIO_NR51 = 0xFF25
     case AUDIO_NR52 = 0xFF26
+    
+    //FF27 to WAVE ram -> unused
+    
+    //wav ram
+    case AUDIO_WAVE_PATTERN_RAM     = 0xFF30
+    case AUDIO_WAVE_PATTERN_RAM_END = 0xFF3F
     
     case LCD_CONTROL = 0xFF40
     case LCD_STATUS  = 0xFF41

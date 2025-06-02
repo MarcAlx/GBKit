@@ -48,7 +48,10 @@ public struct APUConfiguration {
         playback: { _ in } )
 }
 
-public class APU: Component, Clockable {
+public class APU: Component, Clockable, APUProxy {
+    //true if enabled
+    private var enabled = false
+    
     ///buffer filled with 0.0 to express silence
     public private(set) var SILENT_BUFFER:[AudioSample] = []
     
@@ -60,10 +63,13 @@ public class APU: Component, Clockable {
     
     private var frameSequencerStep:Int = 0
     
-    private let channel1:SquareWithSweepChannel
-    private let channel2:SquareChannel
-    private let channel3:WaveChannel
-    private let channel4:NoiseChannel
+    private var channel1:SquareWithSweepChannel
+    private var channel2:SquareChannel
+    private var channel3:WaveChannel
+    private var channel4:NoiseChannel
+    
+    //shorthand
+    private let channels:[AudioChannel]
     
     //rate (in M tick) at which we sample
     private var sampleTickRate:Int = 0
@@ -105,12 +111,30 @@ public class APU: Component, Clockable {
     
     init(mmu:MMU) {
         self.mmu = mmu
-        self.channel1 = Sweep(mmu: self.mmu)
-        self.channel2 = Pulse(mmu: self.mmu)
-        self.channel3 = Wave(mmu: self.mmu)
-        self.channel4 = Noise(mmu: self.mmu)
+        let sweep:Sweep = Sweep(mmu: self.mmu)
+        let pulse:Pulse = Pulse(mmu: self.mmu)
+        let wave:Wave   = Wave(mmu:  self.mmu)
+        let noise:Noise = Noise(mmu: self.mmu)
+        self.channel1 = sweep
+        self.channel2 = pulse
+        self.channel3 = wave
+        self.channel4 = noise
+        self.channels = [sweep, pulse, wave, noise]
+        
         //ensure configuration related properties are set on init
         self.configuration = APUConfiguration.DEFAULT
+        
+        //register to mmu
+        self.mmu.registerAPU(apu: self)
+    }
+    
+    /// initis length timer for a given channel using value from an NRX1 register
+    public func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte){
+        //get channel index
+        let chIdx:Int = channel.rawValue;
+        //timer is set to Default values minus masked part of nrx1 value
+        self.channels[chIdx].lengthTimer = GBConstants.DefaultLengthTimer[chIdx]
+                                         - Int((nrx1Value & GBConstants.NRX1_lengthMask[chIdx]))
     }
     
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
@@ -145,6 +169,8 @@ public class APU: Component, Clockable {
                 //ready for next buffer
                 self.nextBuffer = []
             }
+            
+            self.mmu.registerAPU(apu: self)
         }
     }
     
@@ -263,6 +289,60 @@ public class APU: Component, Clockable {
         self.channel2.reset()
         self.channel3.reset()
         self.channel4.reset()
+        
+        //ensure channels state matches mmu state
+        let nr52 = self.mmu[IOAddresses.AUDIO_NR52.rawValue]
+        self.enabled = isBitSet(ByteMask.Bit_7, nr52)
+        self.channel4.enabled = isBitSet(ByteMask.Bit_3, nr52)
+        self.channel3.enabled = isBitSet(ByteMask.Bit_2, nr52)
+        self.channel2.enabled = isBitSet(ByteMask.Bit_1, nr52)
+        self.channel1.enabled = isBitSet(ByteMask.Bit_0, nr52)
     }
     
+    /// mark: APUProxy
+
+    public var isAPUEnabled: Bool {
+        get {
+            return self.enabled
+        }
+        set {
+            self.enabled = newValue
+        }
+    }
+
+    public var isCH1Enabled: Bool {
+        get {
+            self.channel1.enabled
+        }
+        set {
+            self.channel1.enabled = newValue
+        }
+    }
+
+    public var isCH2Enabled: Bool {
+        get {
+            self.channel2.enabled
+        }
+        set {
+            self.channel2.enabled = newValue
+        }
+    }
+
+    public var isCH3Enabled: Bool {
+        get {
+            self.channel3.enabled
+        }
+        set {
+            self.channel3.enabled = newValue
+        }
+    }
+
+    public var isCH4Enabled: Bool {
+        get {
+            self.channel4.enabled
+        }
+        set {
+            self.channel4.enabled = newValue
+        }
+    }
 }

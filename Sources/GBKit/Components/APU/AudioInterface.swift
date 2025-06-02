@@ -26,6 +26,43 @@ public enum DutyAudioChannelId:Int {
     case CH2 = 1
 }
 
+///to avoid nullable
+struct DefaultAPUProxy: APUProxy {
+    var isAPUEnabled: Bool = false
+    
+    var isCH1Enabled: Bool = false
+    
+    var isCH2Enabled: Bool = false
+    
+    var isCH3Enabled: Bool = false
+    
+    var isCH4Enabled: Bool = false
+    
+    func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value: Byte) {
+    }
+}
+
+/// acts as a proxy over apu state, distinguished from AudioInterface as it doesn't interract with registers
+public protocol APUProxy {
+    ///true if APU is enabled
+    var isAPUEnabled:Bool {get set}
+    
+    ///true if channel 1 is enabled
+    var isCH1Enabled:Bool {get set}
+    
+    ///true if channel 2 is enabled
+    var isCH2Enabled:Bool {get set}
+    
+    ///true if channel 3 is enabled
+    var isCH3Enabled:Bool {get set}
+    
+    ///true if channel 4 is enabled
+    var isCH4Enabled:Bool {get set}
+    
+    /// iniits length timer for a given channel using value from an NRX1 register
+    func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte)
+}
+
 /// ease access to audio registers
 public protocol AudioInterface {
     /// enable or disable audio
@@ -43,15 +80,6 @@ public protocol AudioInterface {
     /// write duty period for an audio channel
     func setPeriod(_ channel:DutyAudioChannelId, _ val:Short)
     
-    /// returns actual length timer value for an audio channel
-    func getLengthTimer(_ channel:AudioChannelId) -> Int
-
-    /// resets length timer value for an audio channel (value is reset to DefaultLengthTImer value for channel)
-    func resetLengthTimer(_ channel:AudioChannelId)
-    
-    ///decrements length timer for an audio channel
-    func decrementLengthTimer(_ channel:AudioChannelId)
-    
     /// true if length is enabled
     func isLengthEnabled(_ channel:AudioChannelId) -> Bool
     
@@ -60,9 +88,6 @@ public protocol AudioInterface {
     
     /// reset trigger for a channel
     func resetTrigger(_ channel:AudioChannelId)
-    
-    ///notify NR52 about channel state
-    func setAudioChannelState(_ channel:AudioChannelId, enabled:Bool)
     
     ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
     func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte
@@ -109,4 +134,7 @@ public protocol AudioInterface {
     
     /// returns VIN panning
     func getVINPanning() -> (L:Bool, R:Bool)
+    
+    ///register an apu for use
+    func registerAPU(apu:APUProxy)
 }

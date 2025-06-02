@@ -17,14 +17,12 @@ public class AudioChannel: Component,
     public internal(set) var cycles: Int = 0
     
     private var _enabled:Bool = false
-    public internal(set) var enabled:Bool{
+    public var enabled:Bool{
         get {
             return self._enabled
         }
         set {
             self._enabled = newValue
-            //notify MMU that channel state has changed
-            self.mmu.setAudioChannelState(self.id, enabled: newValue)
         }
     }
     
@@ -37,6 +35,8 @@ public class AudioChannel: Component,
     public init(mmu: MMU) {
         self.mmu = mmu
     }
+    
+    public internal(set) var lengthTimer:Int = 0
     
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
         //check mmu to check if channel is triggered
@@ -53,16 +53,16 @@ public class AudioChannel: Component,
         //enable
         self.enabled = true
         //reset length if expired
-        if(self.mmu.getLengthTimer(self.id) == 0){
-            self.mmu.resetLengthTimer(self.id)
+        if(self.lengthTimer == 0){
+            self.lengthTimer = GBConstants.DefaultLengthTimer[self.id.rawValue]
         }
     }
     
     public func tickLength() {
-        if(self.mmu.getLengthTimer(self.id)>0 && self.mmu.isLengthEnabled(self.id)) {
-            self.mmu.decrementLengthTimer(self.id)
+        if(self.lengthTimer>0 && self.mmu.isLengthEnabled(self.id)) {
+            self.lengthTimer -= 1
             //when length reaches 0 it disable channel
-            if(self.mmu.getLengthTimer(self.id) == 0){
+            if(self.lengthTimer == 0){
                 self.enabled = false
             }
         }
