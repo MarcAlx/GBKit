@@ -308,13 +308,6 @@ public class MMU: MMUCore, InterruptsControlInterface,
         self[addr] = self.directRead(address: addr) & NegativeByteMask.Bit_7.rawValue
     }
     
-    public func setAudioChannelState(_ channel:AudioChannelId, enabled:Bool) {
-        let actualValue = self[IOAddresses.AUDIO_NR52.rawValue];
-        let newVal:Byte = enabled ? actualValue |  (1 << channel.rawValue) //set concerned bit to 1
-                                  : actualValue & ~(1 << channel.rawValue) //keep every bits but concerned one
-        self[IOAddresses.AUDIO_NR52.rawValue] = newVal
-    }
-    
     ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
     public func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte {
         return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_1000) >> 3;

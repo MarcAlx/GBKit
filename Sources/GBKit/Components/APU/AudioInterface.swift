@@ -48,16 +48,16 @@ public protocol APUProxy {
     var isAPUEnabled:Bool {get set}
     
     ///true if channel 1 is enabled
-    var isCH1Enabled:Bool {get}
+    var isCH1Enabled:Bool {get set}
     
     ///true if channel 2 is enabled
-    var isCH2Enabled:Bool {get}
+    var isCH2Enabled:Bool {get set}
     
     ///true if channel 3 is enabled
-    var isCH3Enabled:Bool {get}
+    var isCH3Enabled:Bool {get set}
     
     ///true if channel 4 is enabled
-    var isCH4Enabled:Bool {get}
+    var isCH4Enabled:Bool {get set}
     
     /// iniits length timer for a given channel using value from an NRX1 register
     func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte)
@@ -88,9 +88,6 @@ public protocol AudioInterface {
     
     /// reset trigger for a channel
     func resetTrigger(_ channel:AudioChannelId)
-    
-    ///notify NR52 about channel state
-    func setAudioChannelState(_ channel:AudioChannelId, enabled:Bool)
     
     ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
     func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte

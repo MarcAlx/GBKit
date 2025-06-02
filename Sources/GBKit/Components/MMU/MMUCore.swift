@@ -112,7 +112,14 @@ public class MMUCore:Component, Clockable {
             case IOAddresses.AUDIO_NR32.rawValue:
                 return self.ram[address] | 0b1001_1111; //only bits 6 5 are readable
             case IOAddresses.AUDIO_NR52.rawValue:
-                return self.ram[address] | 0b0111_0000; //bits 6 5 4 are always 1 on read
+                return self.ram[address]
+                     & 0b1000_0000 //only bit 7 is writable
+                     | 0b0111_0000 //bits 6 5 4 are always 1 on read
+                     //bits 3 2 1 0 depends on channel state
+                     | (self.apuProxy.isCH4Enabled ? 0b0000_1000 : 0)
+                     | (self.apuProxy.isCH3Enabled ? 0b0000_0100 : 0)
+                     | (self.apuProxy.isCH2Enabled ? 0b0000_0010 : 0)
+                     | (self.apuProxy.isCH1Enabled ? 0b0000_0001 : 0);
             case IOAddresses.AUDIO_NR14.rawValue,
                  IOAddresses.AUDIO_NR24.rawValue,
                  IOAddresses.AUDIO_NR34.rawValue,
@@ -192,8 +199,25 @@ public class MMUCore:Component, Clockable {
                 break
             //only bit 7 of NR52 is R/W
             case IOAddresses.AUDIO_NR52.rawValue:
+                let bit7Val = newValue & ByteMask.Bit_7.rawValue
                 self.ram[address] = self.ram[address] & NegativeByteMask.Bit_7.rawValue // clear actual bit 7
-                                  | newValue & ByteMask.Bit_7.rawValue                  // keep only bit 7 of new value
+                                  | bit7Val                                             // keep only bit 7 of new value
+                let willEnable = bit7Val > 0
+                
+                //apu is enabled and will disable
+                if(self.apuProxy.isAPUEnabled && !willEnable) {
+                    //turn off all channel
+                    self.apuProxy.isCH1Enabled = false;
+                    self.apuProxy.isCH2Enabled = false;
+                    self.apuProxy.isCH3Enabled = false;
+                    self.apuProxy.isCH4Enabled = false;
+                }
+                //apu is disabled and will enabled
+                else if(!self.apuProxy.isAPUEnabled && willEnable) {
+                    //this doesn't enable all channel, it's up to developper to re-enable each
+                }
+                //notify enable
+                self.apuProxy.isAPUEnabled = willEnable
                 break
             //default to ram
             default:

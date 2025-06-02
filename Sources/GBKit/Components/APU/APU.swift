@@ -63,10 +63,10 @@ public class APU: Component, Clockable, APUProxy {
     
     private var frameSequencerStep:Int = 0
     
-    private let channel1:SquareWithSweepChannel
-    private let channel2:SquareChannel
-    private let channel3:WaveChannel
-    private let channel4:NoiseChannel
+    private var channel1:SquareWithSweepChannel
+    private var channel2:SquareChannel
+    private var channel3:WaveChannel
+    private var channel4:NoiseChannel
     
     //shorthand
     private let channels:[AudioChannel]
@@ -289,6 +289,14 @@ public class APU: Component, Clockable, APUProxy {
         self.channel2.reset()
         self.channel3.reset()
         self.channel4.reset()
+        
+        //ensure channels state matches mmu state
+        let nr52 = self.mmu[IOAddresses.AUDIO_NR52.rawValue]
+        self.enabled = isBitSet(ByteMask.Bit_7, nr52)
+        self.channel4.enabled = isBitSet(ByteMask.Bit_3, nr52)
+        self.channel3.enabled = isBitSet(ByteMask.Bit_2, nr52)
+        self.channel2.enabled = isBitSet(ByteMask.Bit_1, nr52)
+        self.channel1.enabled = isBitSet(ByteMask.Bit_0, nr52)
     }
     
     /// mark: APUProxy
@@ -306,11 +314,17 @@ public class APU: Component, Clockable, APUProxy {
         get {
             self.channel1.enabled
         }
+        set {
+            self.channel1.enabled = newValue
+        }
     }
 
     public var isCH2Enabled: Bool {
         get {
             self.channel2.enabled
+        }
+        set {
+            self.channel2.enabled = newValue
         }
     }
 
@@ -318,11 +332,17 @@ public class APU: Component, Clockable, APUProxy {
         get {
             self.channel3.enabled
         }
+        set {
+            self.channel3.enabled = newValue
+        }
     }
 
     public var isCH4Enabled: Bool {
         get {
             self.channel4.enabled
+        }
+        set {
+            self.channel4.enabled = newValue
         }
     }
 }

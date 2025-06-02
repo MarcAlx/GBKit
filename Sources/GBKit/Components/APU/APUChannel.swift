@@ -4,7 +4,7 @@ public protocol APUChannel: Component, Clockable {
     var amplitude:Byte { get }
     
     /// true if enabled
-    var enabled:Bool { get }
+    var enabled:Bool { get set }
     
     ///channel id
     var id:AudioChannelId { get }
