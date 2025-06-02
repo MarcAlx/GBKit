@@ -211,6 +211,10 @@ public class MMUCore:Component, Clockable {
                     self.apuProxy.isCH2Enabled = false;
                     self.apuProxy.isCH3Enabled = false;
                     self.apuProxy.isCH4Enabled = false;
+                    //disabling should clear all audio registers except NR52
+                    for addr in MMUAddressSpaces.AUDIO_REGISTERS {
+                        self.ram[addr] = 0
+                    }
                 }
                 //apu is disabled and will enabled
                 else if(!self.apuProxy.isAPUEnabled && willEnable) {

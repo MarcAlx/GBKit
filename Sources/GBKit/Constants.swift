@@ -548,6 +548,7 @@ public enum MMUAddressSpaces {
     static let PROHIBITED_AREA = MMUAddresses.PROHIBITED_AREA.rawValue...MMUAddresses.PROHIBITED_AREA_END.rawValue
     static let OBJECT_ATTRIBUTE_MEMORY:ClosedRange<Short> = MMUAddresses.OBJECT_ATTRIBUTE_MEMORY.rawValue...MMUAddresses.OBJECT_ATTRIBUTE_MEMORY_END.rawValue
     static let IO_REGISTERS = MMUAddresses.IO_REGISTERS.rawValue...MMUAddresses.IO_REGISTERS_END.rawValue
+    static let AUDIO_REGISTERS = IOAddresses.AUDIO_NR10.rawValue...IOAddresses.AUDIO_NR51.rawValue
     static let WAVE_RAM = MMUAddresses.WAVE_RAM.rawValue...MMUAddresses.WAVE_RAM_END.rawValue
     static let HIGH_RAM:ClosedRange<Short> = MMUAddresses.HIGH_RAM.rawValue...MMUAddresses.HIGH_RAM_END.rawValue
     static let WINDOW_TILE_MAP_AREA_0:ClosedRange<Short> = 0x9800...0x9BFF
