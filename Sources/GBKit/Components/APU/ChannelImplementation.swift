@@ -380,13 +380,13 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
                 //reload noise timer
                 self.noiseTimer = self.mmu.getNoiseClockDivisor() * Int(pow(2.0, Double(self.mmu.getNoiseClockShift())))
                 //compute LFSR bit to apply to bit 15 of LFSR (and bit 7 if short mode)
-                let xor:Short = (self.LFSR & 0b10 >> 1) ^ self.LFSR & 0b01
+                let xor:Short = ((self.LFSR & 0b10) >> 1) ^ (self.LFSR & 0b01)
                 //shift LFSR right then store xor at 15bit position
-                self.LFSR = self.LFSR >> 1 & (xor << 14)
+                self.LFSR = (self.LFSR >> 1) | (xor << 14)
                 //in case of short width store it at bit 7 too
                 if(self.mmu.hasNoiseShortWidth()){
                     self.LFSR = (self.LFSR & 0b1111_1111_1011_1111) //clear bit 7 in lfsr
-                              | self.LFSR & xor << 6                //store bit 7 at bit 7
+                              | (xor << 6)                          //store bit 7 at bit 7
                 }
             }
         }
