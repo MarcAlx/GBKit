@@ -172,8 +172,12 @@ public class Sweep: Pulse, SquareWithSweepChannel {
         self.sweepStep  = self.mmu.getSweepStep()
         self.sweepEnabled = self.sweepPace > 0 || self.sweepStep > 0
         //on trigger an OOB check is performed
-        if(self.sweepStep > 0){
-            self.checkNextOutOfBounds()
+        if self.sweepStep > 0 {
+            //Only check
+            let res = self.computePeriod()
+            if res.outOfBounds {
+                self.enabled = false
+            }
         }
     }
     
@@ -190,8 +194,8 @@ public class Sweep: Pulse, SquareWithSweepChannel {
         if(self.sweepTimer==0){
             //reload timer
             self.loadSweepTimer()
-            //timer runs even is sweep is disabled
-            if(self.sweepEnabled){
+            //timer runs even is sweep is disabled but not if pace is 0
+            if(self.sweepEnabled && self.sweepPace > 0){
                 //compute new perdiod
                 let res = self.computePeriod()
                 //apply if not OOB
@@ -220,7 +224,7 @@ public class Sweep: Pulse, SquareWithSweepChannel {
         let newPeriod = self.isSweepDirectionUp ? currentPeriod + deltaPeriod
                                                 : currentPeriod &- deltaPeriod
         return (newPeriod: newPeriod,
-                outOfBounds: newPeriod >= 0x7FF || newPeriod >= currentPeriod)
+                outOfBounds: newPeriod >= 0x7FF)
     }
     
     /// checks if next period computation would produce overflow/underflow if so disable channels
