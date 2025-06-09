@@ -98,7 +98,7 @@ public class AudioChannelWithEnvelope: AudioChannel, EnvelopableChannel{
         self.envelopePace = self.mmu.getEnvelopeSweepPace(self.envelopeId)
         self.envelopeTimer = self.envelopePace
         //save enveloppe direction
-        self.isEnvelopeDirectionUp = self.mmu.getEnvelopeDirection(self.envelopeId) == 0
+        self.isEnvelopeDirectionUp = self.mmu.getEnvelopeDirection(self.envelopeId) == 1
     }
     
     public func tickEnveloppe() {
