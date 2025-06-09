@@ -101,7 +101,7 @@ public protocol AudioInterface {
     ///return sweep pace (nb of iteration before sweep is applied)
     func getSweepPace() -> Byte
     
-    ///return sweep direction, 0 -> Descreasing, 1-> Increasing
+    ///return sweep direction, 1 -> Descreasing, 0-> Increasing (inversion is intentional here to reflect hardware)
     func getSweepDirection() -> Byte
     
     ///get sweep step

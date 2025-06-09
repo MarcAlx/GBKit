@@ -168,7 +168,7 @@ public class Sweep: Pulse, SquareWithSweepChannel {
         self.sweepShadowPeriod = self.mmu.getPeriod(self.periodId)
         self.sweepPace  = self.mmu.getSweepPace()
         self.loadSweepTimer()
-        self.isSweepDirectionUp  = self.mmu.getSweepDirection() != 0
+        self.isSweepDirectionUp  = self.mmu.getSweepDirection() == 0
         self.sweepStep  = self.mmu.getSweepStep()
         self.sweepEnabled = self.sweepPace > 0 || self.sweepStep > 0
         //on trigger an OOB check is performed
