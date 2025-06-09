@@ -361,7 +361,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
                                            CH3_R:Bool,
                                            CH2_R:Bool,
                                            CH1_R:Bool) {
-        var panning = self[IOAddresses.AUDIO_NR51.rawValue];
+        let panning = self[IOAddresses.AUDIO_NR51.rawValue];
         return (CH4_L: panning & 0b1000_0000 > 0,
                 CH3_L: panning & 0b0100_0000 > 0,
                 CH2_L: panning & 0b0010_0000 > 0,
@@ -373,13 +373,13 @@ public class MMU: MMUCore, InterruptsControlInterface,
     }
     
     public func getMasterVolume() -> (L:Byte, R:Byte) {
-        var master = self[IOAddresses.AUDIO_NR50.rawValue];
+        let master = self[IOAddresses.AUDIO_NR50.rawValue];
         return (L:(master & 0b0111_0000) >> 4,
                 R:(master & 0b0000_0111))
     }
     
     public func getVINPanning() -> (L:Bool, R:Bool) {
-        var master = self[IOAddresses.AUDIO_NR50.rawValue];
+        let master = self[IOAddresses.AUDIO_NR50.rawValue];
         return (L:(master & 0b1000_0000) > 0,
                 R:(master & 0b0000_1000) > 0)
     }
