@@ -359,7 +359,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
     private var noiseTimer:Int = 0
     
     /// linear feedback shift register used to produce noise
-    private var LSFR:Short = 0
+    private var LFSR:Short = 0
     
     override public var id: AudioChannelId {
         AudioChannelId.CH4
@@ -367,7 +367,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
     override public func trigger() {
         super.trigger()
         //on trigger re-inits to all 1 bits for its 15bits width
-        self.LSFR = 0b0111_1111_1111_1111
+        self.LFSR = 0b0111_1111_1111_1111
     }
     
     override public func tick(_ masterCycles: Int, _ frameCycles: Int) {
@@ -379,14 +379,14 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
             if(self.noiseTimer <= 0){
                 //reload noise timer
                 self.noiseTimer = self.mmu.getNoiseClockDivisor() * Int(pow(2.0, Double(self.mmu.getNoiseClockShift())))
-                //compute LFSR bit to apply to bit 15 of LSFR (and bit 7 if short mode)
-                let xor:Short = (self.LSFR & 0b10 >> 1) ^ self.LSFR & 0b01
+                //compute LFSR bit to apply to bit 15 of LFSR (and bit 7 if short mode)
+                let xor:Short = (self.LFSR & 0b10 >> 1) ^ self.LFSR & 0b01
                 //shift LFSR right then store xor at 15bit position
-                self.LSFR = self.LSFR >> 1 & (xor << 14)
+                self.LFSR = self.LFSR >> 1 & (xor << 14)
                 //in case of short width store it at bit 7 too
                 if(self.mmu.hasNoiseShortWidth()){
-                    self.LSFR = (self.LSFR & 0b1111_1111_1011_1111) //clear bit 7 in lfsr
-                              | self.LSFR & xor << 6                //store bit 7 at bit 7
+                    self.LFSR = (self.LFSR & 0b1111_1111_1011_1111) //clear bit 7 in lfsr
+                              | self.LFSR & xor << 6                //store bit 7 at bit 7
                 }
             }
         }
@@ -397,7 +397,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
         get {
             if(self.enabled){
                 //amplitude is equal to LFSR bit 1 value (0 or 1) multiplied by volume (byte value)
-                return ~(Byte(self.LSFR & 0xFF) & 0b0000_0001)//value is equal to inverse of first bit
+                return ~(Byte(self.LFSR & 0xFF) & 0b0000_0001)//value is equal to inverse of first bit
                      * self.volume
             }
             else {
