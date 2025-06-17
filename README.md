@@ -79,7 +79,7 @@ _n.b 1 M cycle = 4 T cycles_
 
 #### CPU
 
-Passing : 
+Passing: 
 
  - 01-special.gb
  - 02-interrupts.gb
@@ -99,13 +99,23 @@ Passing :
   
   - [DMG Acid2](https://github.com/mattcurrie/dmg-acid2)
 
+#### MMU
+
+  Non passing:
+  - 01-read_timing.gb
+  - 02-wrtie_timing.gb
+  - 03-modify_timing.gb
+
+  n.b requires CPU to decompose its instruction to reflect mmu state
+
  #### APU (WIP)
 
   Passing :
   
   - 01-registers.gb 
 
-  Non passing :
+  Non passing:
+
   - 02-len ctr.gb 
   - 03-trigger.gb 
   - 04-sweep.gb 
@@ -217,6 +227,7 @@ This project contains some unit tests, objective is to test each core fonction o
 - https://www.reddit.com/r/EmuDev/comments/5gkwi5/gb_apu_sound_emulation/
 - https://www.reddit.com/r/Gameboy/comments/a1c8h0/what_happens_when_a_gameboy_screen_is_disabled/
 - https://www.reddit.com/r/EmuDev/comments/5gkwi5/comment/dat3zni
+- https://www.reddit.com/r/EmuDev/comments/j4xn0s/gb_how_to_get_correct_memory_timings/
 
 - https://forums.nesdev.org/viewtopic.php?t=9088
 - https://forums.nesdev.org/viewtopic.php?t=16621
