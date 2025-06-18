@@ -13,6 +13,7 @@ public enum CPUState {
 public class CPU: CPUImplementation, Clockable {
     public override func reset() {
         self.cycles = 0
+        self.whenToExecuteNextInstruction = -1
         super.reset()
         self.state = CPUState.RUNNING
     }
@@ -20,42 +21,71 @@ public class CPU: CPUImplementation, Clockable {
     var standardInstructionSet:[Instruction] = []
     var extendedInstructionSet:[Instruction] = []
     
+    // instruction to be executed
+    private var nextInstruction:Instruction = Instruction(length: 1, name: "for init purpose", duration:4, emptyOneByteInstruction);
+    // timing to execute next instruction
+    private var whenToExecuteNextInstruction:Int = -1
+    // indicates if next instruction has been decoded
+    private var nextInstructionHasBeenDecoded:Bool = false
+    
     public override init(mmu: MMU) {
         super.init(mmu: mmu)
         self.standardInstructionSet = self.asStandardInstructions()
         self.extendedInstructionSet = self.asExtentedInstructions()
+        self.nextInstruction = self.standardInstructionSet[0]
     }
     
     public func tick(_ masterCycles:Int, _ frameCycles:Int) {
-        //as cycles are incremented during execute, keep up with motherboard before doing the next instruction
-        if(self.cycles > masterCycles) {
-            return
-        }
-        
         if(self.state == CPUState.PANIC) {
             //do nothing
         }
         else if(self.state == CPUState.RUNNING) {
-            //clear this flag, as handleInterrupt will only execute after the next op complete
-            self.interruptsJustEnabled = false;
+            //execute, if instruction decoded and timing is right
+            if(self.nextInstructionHasBeenDecoded && self.cycles >= self.whenToExecuteNextInstruction) {
+                self.resolvePendingInstruction()
+            }
             
-            //to ease PC debugging in Xcode
-            //let pc = self.registers.PC
-            //if(pc == 0x01D2){
-            //    print("add breakpoint here")
-            //}
+            //fetch decode, if no instruction decoded
+            if(!self.nextInstructionHasBeenDecoded) {
+                //to ease PC debugging in Xcode
+                //let pc = self.registers.PC
+                //if(pc == 0x01D2){
+                //    print("add breakpoint here")
+                //}
+                
+                //fetch
+                let opCodeInstr = self.fetch() //on real hardware fetch are done during last 4 cycles of previous instuction, but as cycles are incremented during execute, don't care
+                //decode
+                let instruction = self.decode(opCode:opCodeInstr.0,instr:opCodeInstr.1)
+                //store next execute to resolve only when timing has passed
+                self.nextInstruction = instruction
+                self.whenToExecuteNextInstruction = self.cycles &+ instruction.duration
+                self.nextInstructionHasBeenDecoded = true
+                
+                //n.b the following also works, but CPU state is effective before timing resolve, so postpone via nextInstruction mechanism
+                //
+                //  let duration = self.execute(instruction: instruction)
+                //  self.cycles = self.cycles &+ duration
+                //
+                // in this case you need to keepup with master timing before doing anything via (put at start of tick)
+                //
+                // if(self.cycles > masterCycles) {
+                //     return
+                // }
+            }
             
-            //print(self.registers.describe())
-            
-            //fetch
-            let opCodeInstr = self.fetch() //on real hardware fetch are done during last 4 cycles of previous instuction, but as cycles are incremented during execute, don't care
-            //decode
-            let instruction = self.decode(opCode:opCodeInstr.0,instr:opCodeInstr.1)
-            //execute
-            let duration = self.execute(instruction: instruction)
-            self.cycles = self.cycles &+ duration
-            //print(self.registers.describe())
+            self.cycles = self.cycles &+ GBConstants.MCycleLength
         }
+    }
+    
+    /// resolve next instruction
+    private func resolvePendingInstruction(){
+        //execute
+        self.execute(instruction: self.nextInstruction)
+        //allow decode of next instruction
+        self.nextInstructionHasBeenDecoded = false
+        //clear this flag, as handleInterrupt will only execute after the next op complete
+        self.interruptsJustEnabled = false;
     }
     
     /// fetch an opcode from PC
@@ -116,6 +146,9 @@ public class CPU: CPUImplementation, Clockable {
         
         //handle interrupt only if not just enabled (cpu should wait one op on ei()), IME, enabled, flagged
         if(!self.interruptsJustEnabled && self.interrupts.IME && pendingInterrupts){
+            //resolve pending instruction before performing any interrupt
+            self.resolvePendingInstruction()
+            
             //check interrupt following IE, IF corresponding bit order, 0 VBLANK -> 4 Joypad
             if(self.interrupts.isInterruptEnabled(.VBlank) && self.interrupts.isInterruptFlagged(.VBlank)){
                 self.handleInterrupt(.VBlank, ReservedMemoryLocationAddresses.INTERRUPT_VBLANK.rawValue)
