@@ -41,7 +41,7 @@ public class CPU: CPUImplementation, Clockable {
         }
         else if(self.state == CPUState.RUNNING) {
             //execute, if instruction decoded and timing is right
-            if(self.nextInstructionHasBeenDecoded && self.cycles >= self.whenToExecuteNextInstruction) {
+            if(self.cycles >= self.whenToExecuteNextInstruction) {
                 self.resolvePendingInstruction()
             }
             
@@ -80,12 +80,15 @@ public class CPU: CPUImplementation, Clockable {
     
     /// resolve next instruction
     private func resolvePendingInstruction(){
-        //execute
-        self.execute(instruction: self.nextInstruction)
-        //allow decode of next instruction
-        self.nextInstructionHasBeenDecoded = false
-        //clear this flag, as handleInterrupt will only execute after the next op complete
-        self.interruptsJustEnabled = false;
+        //only if decoded, else could re-executre previous one
+        if(self.nextInstructionHasBeenDecoded) {
+            //execute
+            self.execute(instruction: self.nextInstruction)
+            //allow decode of next instruction
+            self.nextInstructionHasBeenDecoded = false
+            //clear this flag, as handleInterrupt will only execute after the next op complete
+            self.interruptsJustEnabled = false;
+        }
     }
     
     /// fetch an opcode from PC
