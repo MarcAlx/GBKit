@@ -138,17 +138,19 @@ public class CPU: CPUImplementation, Clockable {
     /// poll and trigger interrupts by priority
     public func handleInterrupts() {
         let pendingInterrupts = self.interrupts.IE > 0 && self.interrupts.IF > 0
+           
+        if(pendingInterrupts){
+            //resolve pending instruction before performing any interrupt
+            self.resolvePendingInstruction()
             
-        //if halted with an interrupt -> go back to running
-        if(self.state == .HALTED && pendingInterrupts) {
-            self.state = .RUNNING
+            //if halted with an interrupt -> go back to running
+            if(self.state == .HALTED) {
+                self.state = .RUNNING
+            }
         }
         
         //handle interrupt only if not just enabled (cpu should wait one op on ei()), IME, enabled, flagged
         if(!self.interruptsJustEnabled && self.interrupts.IME && pendingInterrupts){
-            //resolve pending instruction before performing any interrupt
-            self.resolvePendingInstruction()
-            
             //check interrupt following IE, IF corresponding bit order, 0 VBLANK -> 4 Joypad
             if(self.interrupts.isInterruptEnabled(.VBlank) && self.interrupts.isInterruptFlagged(.VBlank)){
                 self.handleInterrupt(.VBlank, ReservedMemoryLocationAddresses.INTERRUPT_VBLANK.rawValue)
