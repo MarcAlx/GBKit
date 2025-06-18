@@ -31,7 +31,7 @@ public class CPU: CPUImplementation, Clockable {
     public override init(mmu: MMU) {
         super.init(mmu: mmu)
         self.standardInstructionSet = self.asStandardInstructions()
-        self.extendedInstructionSet = self.asExtentedInstructions()
+        self.extendedInstructionSet = self.asExtendedInstructions()
         self.nextInstruction = self.standardInstructionSet[0]
     }
     
@@ -93,7 +93,7 @@ public class CPU: CPUImplementation, Clockable {
     private func fetch() -> (OperationCode,[Instruction]) {
         //return ((false, 0x21),standardInstructionSet)
         let opCode = self.readIncrPC()
-        if opCode == GBConstants.ExtentedInstructionSetOpcode {
+        if opCode == GBConstants.ExtendedInstructionSetOpcode {
             return ((true, self.readIncrPC()),extendedInstructionSet)
         }
         return ((false,opCode),standardInstructionSet)

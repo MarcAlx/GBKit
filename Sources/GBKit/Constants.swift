@@ -61,7 +61,7 @@ public struct GameBoyConstants {
     public let RAMSize:Int = 0xFFFF+1
 
     //opcode to lookup for extended instructions
-    public let ExtentedInstructionSetOpcode:Byte = 0xCB
+    public let ExtendedInstructionSetOpcode:Byte = 0xCB
     
     //Div timer frequency in T cycle, (DIV increments at 16384Hz so 4194304 (T) / 16384 (T) = 256 (T)
     public let DivTimerFrequency:Int = 256;

@@ -280,7 +280,7 @@ public class CPUImplementation: CPUCore {
         ]
     }
     
-    func asExtentedInstructions() -> [Instruction] {
+    func asExtendedInstructions() -> [Instruction] {
         return [
             Instruction(opCode: 0x00, length: 1, name: "RLC B", duration:8,rlc_b),
             Instruction(opCode: 0x01, length: 1, name: "RLC C", duration:8,rlc_c),
