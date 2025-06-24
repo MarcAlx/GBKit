@@ -48,6 +48,7 @@ public class PPU: Component, Clockable {
         self.lineSync = 0
         self.windowLineCounter = 0
         self._frameBuffer = pManager.currentEmptyFrame
+        ios.writeLCDStatMode(.HBLANK)
     }
     
     public func flush(){

@@ -69,7 +69,7 @@ public class APU: Component, Clockable, APUProxy {
     private var channel4:NoiseChannel
     
     //shorthand
-    private let channels:[AudioChannel]
+    private var channels:[CoreAudioChannel] = []
     
     //rate (in M tick) at which we sample
     private var sampleTickRate:Int = 0
@@ -111,15 +111,14 @@ public class APU: Component, Clockable, APUProxy {
     
     init(mmu:MMU) {
         self.mmu = mmu
-        let sweep:Sweep = Sweep(mmu: self.mmu)
-        let pulse:Pulse = Pulse(mmu: self.mmu)
-        let wave:Wave   = Wave(mmu:  self.mmu)
-        let noise:Noise = Noise(mmu: self.mmu)
-        self.channel1 = sweep
-        self.channel2 = pulse
-        self.channel3 = wave
-        self.channel4 = noise
-        self.channels = [sweep, pulse, wave, noise]
+        self.channel1 = Sweep(mmu: self.mmu)
+        self.channel2 = Pulse(mmu: self.mmu)
+        self.channel3 = Wave (mmu: self.mmu)
+        self.channel4 = Noise(mmu: self.mmu)
+        self.channels = [self.channel1,
+                         self.channel2,
+                         self.channel3,
+                         self.channel4]
         
         //ensure configuration related properties are set on init
         self.configuration = APUConfiguration.DEFAULT

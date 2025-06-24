@@ -16,7 +16,7 @@ public protocol APUChannel: Component, Clockable {
 /// channel that supports length control
 public protocol LengthableChannel {
     /// timer for length
-    var lengthTimer:Int {get}
+    var lengthTimer:Int {get set}
     
     /// tick length
     func tickLength()
@@ -48,20 +48,27 @@ public protocol EnvelopableChannel {
     func tickEnveloppe()
 }
 
+/// an audio channel is clockable component with length, since all channel have Length cover it in protocol class
+public protocol CoreAudioChannel: Component,
+                                  APUChannel,
+                                  Clockable,
+                                  LengthableChannel{
+}
+
 /// square1 channel support length and enveloppe control
-public protocol SquareChannel: APUChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel {
+public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel {
     ///square id
     var squareId:DutyAudioChannelId { get }
 }
 
 /// square2 channel  support length and enveloppe control along with sweep control
-public protocol SquareWithSweepChannel: APUChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel, SweepableChannel {
+public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel, SweepableChannel {
 }
 
 /// wave channel supports length and volume control
-public protocol WaveChannel: APUChannel, PeriodicChannel, LengthableChannel, VolumableChannel {
+public protocol WaveChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, VolumableChannel {
 }
 
 /// noise channel supports length and enveloppe control
-public protocol NoiseChannel: APUChannel, LengthableChannel, EnvelopableChannel {
+public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnvelopableChannel {
 }

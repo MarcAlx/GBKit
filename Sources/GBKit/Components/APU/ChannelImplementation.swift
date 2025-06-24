@@ -1,10 +1,7 @@
 import Foundation
 
 ///a super class for all audio channel
-public class AudioChannel: Component,
-                           APUChannel,
-                           Clockable,
-                           LengthableChannel /*since all channel have Length handle it in super class*/ {
+public class AudioChannel: CoreAudioChannel {
     
     public var id: AudioChannelId {
         get {
@@ -36,7 +33,7 @@ public class AudioChannel: Component,
         self.mmu = mmu
     }
     
-    public internal(set) var lengthTimer:Int = 0
+    public var lengthTimer:Int = 0
     
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
         //check mmu to check if channel is triggered
