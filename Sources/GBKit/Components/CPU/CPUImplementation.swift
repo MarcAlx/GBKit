@@ -17,7 +17,7 @@ private func forward(_ one:OneByteInstruction? = nil,
     return emptyVariableLengthInstruction
 }
 
-public class CPUImplementation: CPUCore {
+public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func asStandardInstructions() -> [Instruction] {
         let unsupported:Instruction = Instruction(length: 1, name: "panic", duration:4, self.panic)
         return [
