@@ -53,6 +53,8 @@ public protocol CoreAudioChannel: Component,
                                   APUChannel,
                                   Clockable,
                                   LengthableChannel{
+    ///register an APU for further usage
+    func registerAPU(apu: APUProxy)
 }
 
 /// square1 channel support length and enveloppe control

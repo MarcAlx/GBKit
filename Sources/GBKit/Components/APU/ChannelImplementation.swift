@@ -10,6 +10,7 @@ public class AudioChannel: CoreAudioChannel {
     }
     
     let mmu:MMU
+    var apuProxy:APUProxy = DefaultAPUProxy()
     
     public internal(set) var cycles: Int = 0
     
@@ -31,6 +32,10 @@ public class AudioChannel: CoreAudioChannel {
     
     public init(mmu: MMU) {
         self.mmu = mmu
+    }
+    
+    public func registerAPU(apu: APUProxy) {
+        self.apuProxy = apu
     }
     
     public var lengthTimer:Int = 0

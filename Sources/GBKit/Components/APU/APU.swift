@@ -123,8 +123,12 @@ public class APU: Component, Clockable, APUProxy {
         //ensure configuration related properties are set on init
         self.configuration = APUConfiguration.DEFAULT
         
-        //register to mmu
+        //register where needed
         self.mmu.registerAPU(apu: self)
+        self.channel1.registerAPU(apu: self)
+        self.channel2.registerAPU(apu: self)
+        self.channel3.registerAPU(apu: self)
+        self.channel4.registerAPU(apu: self)
     }
     
     /// initis length timer for a given channel using value from an NRX1 register
