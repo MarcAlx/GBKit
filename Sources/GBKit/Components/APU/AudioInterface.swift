@@ -40,6 +40,10 @@ struct DefaultAPUProxy: APUProxy {
     
     func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value: Byte) {
     }
+    
+    func willNotTickLength() -> Bool {
+        return false
+    }
 }
 
 /// acts as a proxy over apu state, distinguished from AudioInterface as it doesn't interract with registers
@@ -61,6 +65,9 @@ public protocol APUProxy {
     
     /// iniits length timer for a given channel using value from an NRX1 register
     func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte)
+    
+    /// true if length will not be ticked during next step of sequencer
+    func willNotTickLength() -> Bool
 }
 
 /// ease access to audio registers
