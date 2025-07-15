@@ -58,7 +58,7 @@ public class AudioChannel: CoreAudioChannel {
         if(self.lengthTimer == 0){
             self.lengthTimer = GBConstants.DefaultLengthTimer[self.id.rawValue]
             //obscure behavior, if APU next sequencer step is not length, trigger should decrement once length timer
-            if(self.apuProxy.willNotTickLength()){
+            if(!self.apuProxy.willTickLength){
                 self.lengthTimer -= 1
             }
         }

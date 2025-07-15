@@ -38,11 +38,9 @@ struct DefaultAPUProxy: APUProxy {
     
     var isCH4Enabled: Bool = false
     
-    func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value: Byte) {
-    }
+    var willTickLength: Bool = false
     
-    func willNotTickLength() -> Bool {
-        return false
+    func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value: Byte) {
     }
 }
 
@@ -63,11 +61,11 @@ public protocol APUProxy {
     ///true if channel 4 is enabled
     var isCH4Enabled:Bool {get set}
     
+    /// true if length will  ticked during next step of sequencer
+    var willTickLength:Bool {get}
+    
     /// iniits length timer for a given channel using value from an NRX1 register
     func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte)
-    
-    /// true if length will not be ticked during next step of sequencer
-    func willNotTickLength() -> Bool
 }
 
 /// ease access to audio registers

@@ -109,6 +109,15 @@ public class APU: Component, Clockable, APUProxy {
     //timer to generate timer
     private var sampleTimer = 0
     
+    public var willTickLength:Bool {
+        get {
+               self.frameSequencerStep == 0
+            || self.frameSequencerStep == 2
+            || self.frameSequencerStep == 4
+            || self.frameSequencerStep == 6
+        }
+    }
+    
     init(mmu:MMU) {
         self.mmu = mmu
         self.channel1 = Sweep(mmu: self.mmu)
@@ -233,13 +242,6 @@ public class APU: Component, Clockable, APUProxy {
         
         //go to next step
         self.frameSequencerStep = (self.frameSequencerStep + 1) % 8
-    }
-    
-    public func willNotTickLength() -> Bool {
-        return self.frameSequencerStep != 0
-            && self.frameSequencerStep != 2
-            && self.frameSequencerStep != 4
-            && self.frameSequencerStep != 6
     }
     
     /// return L and R sample by mixing each channel amplitude
