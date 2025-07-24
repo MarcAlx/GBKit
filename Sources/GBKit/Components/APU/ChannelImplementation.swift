@@ -407,8 +407,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
         get {
             if(self.enabled){
                 //amplitude is equal to LFSR bit 1 value (0 or 1) multiplied by volume (byte value)
-                return ~(Byte(self.LFSR & 0xFF) & 0b0000_0001)//value is equal to inverse of first bit
-                     * self.volume
+                return Byte(self.LFSR & 0b0000_0000_0000_0001) == 0 ? self.volume : 0
             }
             else {
                 return 0
