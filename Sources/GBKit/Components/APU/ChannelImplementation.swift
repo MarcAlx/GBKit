@@ -400,6 +400,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
                 }
             }
         }
+        super.tick(masterCycles, frameCycles)
     }
     
     /// returns channel amplitude
