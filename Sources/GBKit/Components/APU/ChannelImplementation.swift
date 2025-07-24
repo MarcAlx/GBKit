@@ -321,7 +321,7 @@ public class Wave: AudioChannel, WaveChannel {
         super.trigger()
         self.position = 0
         self.isUpperNibbleRead = true //read upper nibble first
-        self.initialWaveTimer = GBConstants.APUPeriodDivider - Int(self.mmu.getPeriod(self.periodId)) * GBConstants.APUSpeedDivider /*wave runs at APU speed*/
+        self.initialWaveTimer = (GBConstants.APUPeriodDivider - Int(self.mmu.getPeriod(self.periodId))) * GBConstants.APUSpeedDivider /*wave runs at APU speed*/
         self.waveTimer = self.initialWaveTimer
     }
     
