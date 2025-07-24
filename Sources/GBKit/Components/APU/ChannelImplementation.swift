@@ -338,7 +338,7 @@ public class Wave: AudioChannel, WaveChannel {
                 self.isUpperNibbleRead = !self.isUpperNibbleRead
                 //increment position if nibble has been switched from low to high
                 if(self.isUpperNibbleRead){
-                    self.position += 1
+                    self.position = (self.position + 1) % 16
                 }
             }
         }
