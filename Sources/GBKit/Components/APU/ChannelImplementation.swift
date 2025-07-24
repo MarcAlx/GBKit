@@ -342,6 +342,7 @@ public class Wave: AudioChannel, WaveChannel {
                 }
             }
         }
+        super.tick(masterCycles, frameCycles)
     }
     
     /// returns channel amplitude according to current wave pattern
