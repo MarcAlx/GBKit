@@ -395,7 +395,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
             
             if(self.noiseTimer <= 0){
                 //reload noise timer
-                self.noiseTimer = self.mmu.getNoiseClockDivisor() * Int(pow(2.0, Double(self.mmu.getNoiseClockShift())))
+                self.noiseTimer = self.mmu.getNoiseClockDivisor() << self.mmu.getNoiseClockShift()
                 //compute LFSR bit to apply to bit 15 of LFSR (and bit 7 if short mode)
                 let xor:Short = ((self.LFSR & 0b10) >> 1) ^ (self.LFSR & 0b01)
                 //shift LFSR right then store xor at 15bit position
