@@ -350,7 +350,7 @@ public class Wave: AudioChannel, WaveChannel {
                 //reload wave timer
                 self.waveTimer = self.initialWaveTimer
                 //update position
-                self.position = (self.position + 1) % MMUAddressSpaces.WAVE_RAM.count
+                self.position = (self.position + 1) % (MMUAddressSpaces.WAVE_RAM.count * 2)
             }
         }
         super.tick(masterCycles, frameCycles)
