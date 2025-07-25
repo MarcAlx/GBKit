@@ -309,20 +309,36 @@ public class Wave: AudioChannel, WaveChannel {
     }
     
     //current sample read in wave
-    private var position:Short = 0
-    //nibble read, upper: true, false else
-    private var isUpperNibbleRead:Bool = true
+    private var position:Int = 0
     //initial wave timer value to avoid update before trigger
     private var initialWaveTimer:Int = 0
     //timer at which wave is updated
     private var waveTimer:Int = 0
+    //store each wave ram nibble (16byte * 2 nibbles = 32 values) Upper, Lower, Upper, Lower...
+    private var wavSamples:[Byte] = Array(repeating: 0xFF, count: MMUAddressSpaces.WAVE_RAM.count * 2)
+    
+    override public func reset() {
+        super.reset()
+        self.fillWavSample()
+    }
+    
+    /// split wave ram into 32 wav samples
+    private func fillWavSample() {
+        var nibblePos = 0
+        for addr in MMUAddressSpaces.WAVE_RAM {
+            self.wavSamples[nibblePos] = self.mmu[addr] >> 4
+            nibblePos += 1
+            self.wavSamples[nibblePos] = self.mmu[addr] & 0b0000_1111
+            nibblePos += 1
+        }
+    }
     
     override public func trigger() {
         super.trigger()
         self.position = 0
-        self.isUpperNibbleRead = true //read upper nibble first
         self.initialWaveTimer = (GBConstants.APUPeriodDivider - Int(self.mmu.getPeriod(self.periodId))) * GBConstants.APUSpeedDivider /*wave runs at APU speed*/
         self.waveTimer = self.initialWaveTimer
+        self.fillWavSample()
     }
     
     override public func tick(_ masterCycles: Int, _ frameCycles: Int) {
@@ -334,12 +350,8 @@ public class Wave: AudioChannel, WaveChannel {
             if(self.waveTimer <= 0){
                 //reload wave timer
                 self.waveTimer = self.initialWaveTimer
-                //update nibble read
-                self.isUpperNibbleRead = !self.isUpperNibbleRead
-                //increment position if nibble has been switched from low to high
-                if(self.isUpperNibbleRead){
-                    self.position = (self.position + 1) % 16
-                }
+                //update position
+                self.position = (self.position + 1) % MMUAddressSpaces.WAVE_RAM.count
             }
         }
         super.tick(masterCycles, frameCycles)
@@ -349,12 +361,7 @@ public class Wave: AudioChannel, WaveChannel {
     public override var amplitude:Byte {
         get {
             if(self.enabled){
-                let sample:Byte = self.mmu[MMUAddressSpaces.WAVE_RAM.lowerBound+self.position]
-                //if upper nibble is read erase by shift lower nibble, else erase by & upper nibble
-                let sampleValue:Byte = self.isUpperNibbleRead ? sample >> 4
-                                                              : sample & 0b0000_1111
-                //apply volume shift (wave channel has no individual volume control as others)
-                return sampleValue >> GBConstants.WaveShiftValue[Int(self.mmu.getWaveOutputLevel())]
+                return self.wavSamples[self.position] >> GBConstants.WaveShiftValue[Int(self.mmu.getWaveOutputLevel())]
             }
             else {
                 return 0
