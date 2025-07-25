@@ -193,6 +193,11 @@ public class MMUCore:Component, Clockable {
                 self.apuProxy.initLengthTimer(AudioChannelId.CH2, newValue)
                 self.ram[address] = newValue
                 break
+            //ensure setting NR30 bit 7 update CH3 enabled state
+            case IOAddresses.AUDIO_NR30.rawValue:
+                self.apuProxy.isCH3Enabled = isBitSet(.Bit_7, newValue)
+                self.ram[address] = newValue
+                break
                 //updating NR31 must init length timer for channel 3
             case IOAddresses.AUDIO_NR31.rawValue:
                 self.apuProxy.initLengthTimer(AudioChannelId.CH3, newValue)
