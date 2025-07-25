@@ -42,7 +42,7 @@ public struct APUConfiguration {
     
     ///default configuration, mainly for init purpose
     public static let DEFAULT:APUConfiguration = APUConfiguration(
-        sampleRate: 441000,
+        sampleRate: 44100,
         bufferSize: 256,
         normalizationMethod: .RAW,
         playback: { _ in } )
