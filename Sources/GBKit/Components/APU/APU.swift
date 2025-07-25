@@ -186,8 +186,6 @@ public class APU: Component, Clockable, APUProxy {
                 //ready for next buffer
                 self.nextBuffer = []
             }
-            
-            self.mmu.registerAPU(apu: self)
         }
     }
     
