@@ -40,6 +40,11 @@ public struct APUConfiguration {
         self.playback = playback!
     }
     
+    public var isChannel1Enabled:Bool = true
+    public var isChannel2Enabled:Bool = true
+    public var isChannel3Enabled:Bool = true
+    public var isChannel4Enabled:Bool = true
+    
     ///default configuration, mainly for init purpose
     public static let DEFAULT:APUConfiguration = APUConfiguration(
         sampleRate: 44100,
@@ -257,31 +262,44 @@ public class APU: Component, Clockable, APUProxy {
         //apply panning
         
         //CH1
-      //  if(panning.CH1_L){
-      //      leftSample += Int(self.channel1.amplitude)
-      //  }
-      //  if(panning.CH1_R){
-      //      rightSample += Int(self.channel1.amplitude)
-      //  }
-   //
-      //  //CH2
-      //  if(panning.CH2_L){
-      //      leftSample += Int(self.channel2.amplitude)
-      //  }
-      //  if(panning.CH2_R){
-      //      rightSample += Int(self.channel2.amplitude)
-      //  }
-      
-        //CH3
-        if(panning.CH3_L){
-            leftSample += Int(self.channel3.amplitude)
+        if(self.configuration.isChannel1Enabled){
+            if(panning.CH1_L){
+                leftSample += Int(self.channel1.amplitude)
+            }
+            if(panning.CH1_R){
+                rightSample += Int(self.channel1.amplitude)
+            }
         }
-        if(panning.CH3_R){
-            rightSample += Int(self.channel3.amplitude)
+        
+        //CH2
+        if(self.configuration.isChannel2Enabled){
+            if(panning.CH2_L){
+                leftSample += Int(self.channel2.amplitude)
+            }
+            if(panning.CH2_R){
+                rightSample += Int(self.channel2.amplitude)
+            }
+        }
+        
+        //CH3
+        if(self.configuration.isChannel3Enabled){
+            if(panning.CH3_L){
+                leftSample += Int(self.channel3.amplitude)
+            }
+            if(panning.CH3_R){
+                rightSample += Int(self.channel3.amplitude)
+            }
         }
         
         //CH4
-     //   }
+        if(self.configuration.isChannel4Enabled) {
+            if(panning.CH4_L){
+                leftSample += Int(self.channel4.amplitude)
+            }
+            if(panning.CH4_R){
+                rightSample += Int(self.channel4.amplitude)
+            }
+        }
         
         //return sample by applying master volume
         // divide each sample             by 4, as we have summed up all 4 channel amplitudes
