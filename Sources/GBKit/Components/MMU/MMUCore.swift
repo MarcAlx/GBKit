@@ -143,6 +143,12 @@ public class MMUCore:Component, Clockable {
                 return
             }
             
+            //if CH3 is active reading wave ram write is not allowed
+            if(self.apuProxy.isCH3Enabled
+            && MMUAddressSpaces.WAVE_RAM.contains(address)) {
+                return
+            }
+            
             switch address {
             //mirror C000-DDFF (which is 0x2000 behind)
             case MMUAddressSpaces.ECHO_RAM:
