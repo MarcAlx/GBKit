@@ -193,7 +193,7 @@ public class APU: Component, Clockable, APUProxy {
         case .RAW:
             self._audioBuffer = self.nextBuffer.map { (L:Float($0.L), R:Float($0.R)) }
         case .FLOAT_MINUS_1_TO_1:
-            self._audioBuffer = self.nextBuffer.map { (L:self.byteToFloatMap[$0.L], R:self.byteToFloatMap[$0.L]) }
+            self._audioBuffer = self.nextBuffer.map { (L:self.byteToFloatMap[$0.L], R:self.byteToFloatMap[$0.R]) }
         }
     }
     
@@ -257,21 +257,21 @@ public class APU: Component, Clockable, APUProxy {
         //apply panning
         
         //CH1
-        if(panning.CH1_L){
-            leftSample += Int(self.channel1.amplitude)
-        }
-        if(panning.CH1_R){
-            rightSample += Int(self.channel1.amplitude)
-        }
-        
-        //CH2
-        if(panning.CH2_L){
-            leftSample += Int(self.channel2.amplitude)
-        }
-        if(panning.CH2_R){
-            rightSample += Int(self.channel2.amplitude)
-        }
-        
+      //  if(panning.CH1_L){
+      //      leftSample += Int(self.channel1.amplitude)
+      //  }
+      //  if(panning.CH1_R){
+      //      rightSample += Int(self.channel1.amplitude)
+      //  }
+   //
+      //  //CH2
+      //  if(panning.CH2_L){
+      //      leftSample += Int(self.channel2.amplitude)
+      //  }
+      //  if(panning.CH2_R){
+      //      rightSample += Int(self.channel2.amplitude)
+      //  }
+      
         //CH3
         if(panning.CH3_L){
             leftSample += Int(self.channel3.amplitude)
@@ -281,12 +281,7 @@ public class APU: Component, Clockable, APUProxy {
         }
         
         //CH4
-        if(panning.CH4_L){
-            leftSample += Int(self.channel4.amplitude)
-        }
-        if(panning.CH4_R){
-            rightSample += Int(self.channel4.amplitude)
-        }
+     //   }
         
         //return sample by applying master volume
         // divide each sample             by 4, as we have summed up all 4 channel amplitudes
