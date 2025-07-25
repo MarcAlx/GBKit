@@ -69,14 +69,8 @@ public struct GameBoyConstants {
     //APU frame sequencer frequency, 512hz
     public let APUFrameSequencerFrequency:Int = 512
     
-    //APU is slower than CPU by this divider
-    public let APUSpeedDivider:Int = 2
-    
-    //Channel with Enveloppe are slower relative to APU
-    public let EnveloppeRelativeSpeedDivider:Int = 2
-    
-    //Speed divider relative to CPU speed
-    public let EnveloppeAbsoluteSpeedDivider:Int
+    //Wave channel is 2 times faster than other audio channel
+    public let WaveChannelSpeedFactor: Int = 2
     
     //length on an APU frame sequencer step
     public let APUFrameSequencerStepLength:Int
@@ -412,7 +406,6 @@ public struct GameBoyConstants {
         self.ROMBankSizeInBytes = ROMBankSize * 1024
         self.VBLANK_TRIGGER = ScreenHeight * MCyclesPerScanline //Vblank is triggered after all line has been rendered
         self.APUFrameSequencerStepLength =  CPUSpeed / APUFrameSequencerFrequency
-        self.EnveloppeAbsoluteSpeedDivider = APUSpeedDivider * EnveloppeRelativeSpeedDivider
     }
 }
 

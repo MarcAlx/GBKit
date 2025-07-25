@@ -335,7 +335,7 @@ public class Wave: AudioChannel, WaveChannel {
     override public func trigger() {
         super.trigger()
         self.position = 0
-        self.initialWaveTimer = (GBConstants.APUPeriodDivider - Int(self.mmu.getPeriod(self.periodId))) * GBConstants.APUSpeedDivider /*wave runs at APU speed*/
+        self.initialWaveTimer = (GBConstants.APUPeriodDivider - Int(self.mmu.getPeriod(self.periodId))) / GBConstants.WaveChannelSpeedFactor //divide as if ticked every 4t, timer should be smaller if faster
         self.waveTimer = self.initialWaveTimer
         self.fillWavSample()
     }
