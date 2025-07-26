@@ -18,7 +18,7 @@ public class Motherboard: Clockable {
     
     public init() {
         self.mmu = MMU()
-        self.ppu = PPU(mmu: self.mmu, pm: PaletteManager.sharedInstance)
+        self.ppu = PPU(mmu: self.mmu)
         self.cpu = CPU(mmu: self.mmu)
         self.apu = APU(mmu: self.mmu)
         self.joypad = JoyPad(mmu: self.mmu)
