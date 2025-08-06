@@ -95,13 +95,13 @@ public protocol AudioInterface {
     func resetTrigger(_ channel:AudioChannelId)
     
     ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
-    func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte
+    func getEnveloppeDirection(_ channel:EnveloppableAudioChannelId) -> Byte
     
     ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    func getEnvelopeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte
+    func getEnveloppeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte
     
     ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    func getEnvelopeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte
+    func getEnveloppeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte
     
     ///return sweep pace (nb of iteration before sweep is applied)
     func getSweepPace() -> Byte

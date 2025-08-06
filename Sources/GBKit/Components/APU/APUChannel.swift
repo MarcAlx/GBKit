@@ -40,9 +40,9 @@ public protocol PeriodicChannel {
 }
 
 /// channel that supports enveloppe control
-public protocol EnvelopableChannel {
+public protocol EnveloppableChannel {
     ///channel id
-    var envelopeId:EnveloppableAudioChannelId { get }
+    var enveloppeId:EnveloppableAudioChannelId { get }
     
     /// tick volume
     func tickEnveloppe()
@@ -58,13 +58,13 @@ public protocol CoreAudioChannel: Component,
 }
 
 /// square1 channel support length and enveloppe control
-public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel {
+public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnveloppableChannel {
     ///square id
     var squareId:DutyAudioChannelId { get }
 }
 
 /// square2 channel  support length and enveloppe control along with sweep control
-public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel, SweepableChannel {
+public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnveloppableChannel, SweepableChannel {
 }
 
 /// wave channel supports length and volume control
@@ -72,5 +72,5 @@ public protocol WaveChannel: CoreAudioChannel, PeriodicChannel, LengthableChanne
 }
 
 /// noise channel supports length and enveloppe control
-public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnvelopableChannel {
+public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnveloppableChannel {
 }
