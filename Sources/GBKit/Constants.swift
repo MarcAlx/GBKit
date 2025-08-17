@@ -78,6 +78,9 @@ public struct GameBoyConstants {
     //value used to determine audio channel frequency
     public let APUPeriodDivider:Int = 2048
     
+    //charge used for APU's HPF
+    public let APUHighPassFilterDefaultCharge:Float = 0.999958
+    
     //duty patterns indexed to their matching NR11 and NR21 value
     public let DutyPatterns:[[Byte]] = [
         [0, 0, 0, 0, 0, 0, 0, 1], //00 -> 12,5%

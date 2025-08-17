@@ -1,3 +1,5 @@
+import Foundation
+
 //not normalized audio sample (int value randed from 0 to 255
 typealias RawAudioSample = (L:Int, R:Int)
 
@@ -44,6 +46,7 @@ public struct APUConfiguration {
     public var isChannel2Enabled:Bool = true
     public var isChannel3Enabled:Bool = true
     public var isChannel4Enabled:Bool = true
+    public var isHPFEnabled:Bool = true
     
     ///default configuration, mainly for init purpose
     public static let DEFAULT:APUConfiguration = APUConfiguration(
@@ -68,6 +71,10 @@ public class APU: Component, Clockable, APUProxy {
     
     private var frameSequencerStep:Int = 0
     
+    private var hpfCapacitorL: Float = 0.0
+    private var hpfCapacitorR: Float = 0.0
+    private var hpfChargeFactor: Float = 0.0
+    
     private var channel1:SquareWithSweepChannel
     private var channel2:SquareChannel
     private var channel3:WaveChannel
@@ -90,6 +97,8 @@ public class APU: Component, Clockable, APUProxy {
             self._audioBuffer = self.SILENT_BUFFER
             //init sample rate, we will tick every sampleRate fraction of CPUSpeed (both are expressed in the same unit Hz)
             self.sampleTickRate = GBConstants.CPUSpeed / newValue.sampleRate
+            //pre-compute charge factor
+            self.hpfChargeFactor = self.computeHPFChargeFactor()
         }
         get {
             self._configuration
@@ -199,8 +208,15 @@ public class APU: Component, Clockable, APUProxy {
         case .RAW:
             self._audioBuffer = self.nextBuffer.map { (L:Float($0.L), R:Float($0.R)) }
         case .FLOAT_MINUS_1_TO_1:
-            self._audioBuffer = self.nextBuffer.map { (L:self.byteToFloatMap_Minus_One_To_One[$0.L],
-                                                       R:self.byteToFloatMap_Minus_One_To_One[$0.R]) }
+            self._audioBuffer = self.nextBuffer.map {
+                let sample = (L:self.byteToFloatMap_Minus_One_To_One[$0.L],
+                              R:self.byteToFloatMap_Minus_One_To_One[$0.R])
+                //apply HPF if required
+                if(self.configuration.isHPFEnabled){
+                    return self.applyHighPassFilter(sample)
+                }
+                return sample
+            }
         }
     }
     
@@ -324,6 +340,20 @@ public class APU: Component, Clockable, APUProxy {
         self.channel3.enabled = isBitSet(ByteMask.Bit_2, nr52)
         self.channel2.enabled = isBitSet(ByteMask.Bit_1, nr52)
         self.channel1.enabled = isBitSet(ByteMask.Bit_0, nr52)
+    }
+    
+    /// apply HPF to input sample
+    private func applyHighPassFilter(_ input: AudioSample) -> AudioSample {
+        let outL = input.L - hpfCapacitorL
+        let outR = input.R - hpfCapacitorR
+        hpfCapacitorL = input.L - outL * self.hpfChargeFactor
+        hpfCapacitorR = input.R - outR * self.hpfChargeFactor
+        return (L: outL, R: outR)
+    }
+    
+    /// return HPF charge factor for current sample rate
+    private func computeHPFChargeFactor() -> Float {
+        return pow(GBConstants.APUHighPassFilterDefaultCharge, Float(GBConstants.CPUSpeed) / Float(configuration.sampleRate))
     }
     
     /// mark: APUProxy
