@@ -97,7 +97,10 @@ public class APU: Component, Clockable, APUProxy {
     }
     
     ///to avoid useless computation when normalized is prompted, map each value from 0 to 255 with its counterpart between 0.0 and 1.0
-    private let byteToFloatMap:[Float] = Array(0 ..< Int(Byte.max)+1 ).map { Float($0) / 255.0 }
+    private let byteToFloatMap_Zero_To_One:[Float] = Array(0 ... Int(Byte.max)).map { Float($0) / 255.0 }
+    
+    ///to avoid useless computation when normalized is prompted, map each value from 0 to 255 with its counterpart between -1.0 and 1.0
+    private let byteToFloatMap_Minus_One_To_One:[Float] = Array(0 ... Int(Byte.max)).map { ((Float($0) / Float(Byte.max)) * 2.0) - 1.0 }
     
     private var _audioBuffer:[AudioSample] = []
     /// last commited audio buffer, ready to play
@@ -196,7 +199,8 @@ public class APU: Component, Clockable, APUProxy {
         case .RAW:
             self._audioBuffer = self.nextBuffer.map { (L:Float($0.L), R:Float($0.R)) }
         case .FLOAT_MINUS_1_TO_1:
-            self._audioBuffer = self.nextBuffer.map { (L:self.byteToFloatMap[$0.L], R:self.byteToFloatMap[$0.R]) }
+            self._audioBuffer = self.nextBuffer.map { (L:self.byteToFloatMap_Minus_One_To_One[$0.L],
+                                                       R:self.byteToFloatMap_Minus_One_To_One[$0.R]) }
         }
     }
     
