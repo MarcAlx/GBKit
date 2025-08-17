@@ -56,6 +56,26 @@ enum NegativeByteMask: Byte {
     case Bit_0 = 0b1111_1110
 }
 
+/// 16bit/Short mask to extract/check bit
+enum NegativeShortMask: Short {
+    case Bit_15 = 0b0111_1111_1111_1111
+    case Bit_14 = 0b1011_1111_1111_1111
+    case Bit_13 = 0b1101_1111_1111_1111
+    case Bit_12 = 0b1110_1111_1111_1111
+    case Bit_11 = 0b1111_0111_1111_1111
+    case Bit_10 = 0b1111_1011_1111_1111
+    case Bit_9  = 0b1111_1101_1111_1111
+    case Bit_8  = 0b1111_1110_1111_1111
+    case Bit_7  = 0b1111_1111_0111_1111
+    case Bit_6  = 0b1111_1111_1011_1111
+    case Bit_5  = 0b1111_1111_1101_1111
+    case Bit_4  = 0b1111_1111_1110_1111
+    case Bit_3  = 0b1111_1111_1111_0111
+    case Bit_2  = 0b1111_1111_1111_1011
+    case Bit_1  = 0b1111_1111_1111_1101
+    case Bit_0  = 0b1111_1111_1111_1110
+}
+
 /// true if new value has overflown old
 func hasOverflown<T>(_ old:T, _ new:T) -> Bool where T:Comparable, T:Numeric {
     return new < old //if value has overflow then new value is lower than old
@@ -164,8 +184,18 @@ func clear(_ mask: NegativeByteMask,_ val: Byte) -> Byte {
     return (val & mask.rawValue)
 }
 
+/// set given bit to 0 in byte
+func clear(_ mask: NegativeShortMask,_ val: Short) -> Short {
+    return (val & mask.rawValue)
+}
+
 /// set given bit to 1 in byte
 func set(_ mask: ByteMask, _ val: Byte) -> Byte {
+    return (val | mask.rawValue)
+}
+
+/// set given bit to 1 in Short
+func set(_ mask: ShortMask, _ val: Short) -> Short {
     return (val | mask.rawValue)
 }
 

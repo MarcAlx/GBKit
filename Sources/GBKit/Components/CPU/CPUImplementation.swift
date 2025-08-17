@@ -948,7 +948,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_0_e() -> Void { self.registers.E = clear(.Bit_0, self.registers.E) }
     func res_0_h() -> Void { self.registers.H = clear(.Bit_0, self.registers.H) }
     func res_0_l() -> Void { self.registers.L = clear(.Bit_0, self.registers.L) }
-    func res_0_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_0,mmu.read(address: self.registers.HL))) }
+    func res_0_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_0,mmu.read(address: self.registers.HL))) }
     func res_0_a() -> Void { self.registers.A = clear(.Bit_0, self.registers.A) }
     func res_1_b() -> Void { self.registers.B = clear(.Bit_1, self.registers.B) }
     func res_1_c() -> Void { self.registers.C = clear(.Bit_1, self.registers.C) }
@@ -956,7 +956,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_1_e() -> Void { self.registers.E = clear(.Bit_1, self.registers.E) }
     func res_1_h() -> Void { self.registers.H = clear(.Bit_1, self.registers.H) }
     func res_1_l() -> Void { self.registers.L = clear(.Bit_1, self.registers.L) }
-    func res_1_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_1,mmu.read(address: self.registers.HL))) }
+    func res_1_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_1,mmu.read(address: self.registers.HL))) }
     func res_1_a() -> Void { self.registers.A = clear(.Bit_1, self.registers.A) }
     func res_2_b() -> Void { self.registers.B = clear(.Bit_2, self.registers.B) }
     func res_2_c() -> Void { self.registers.C = clear(.Bit_2, self.registers.C) }
@@ -964,7 +964,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_2_e() -> Void { self.registers.E = clear(.Bit_2, self.registers.E) }
     func res_2_h() -> Void { self.registers.H = clear(.Bit_2, self.registers.H) }
     func res_2_l() -> Void { self.registers.L = clear(.Bit_2, self.registers.L) }
-    func res_2_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_2,mmu.read(address: self.registers.HL))) }
+    func res_2_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_2,mmu.read(address: self.registers.HL))) }
     func res_2_a() -> Void { self.registers.A = clear(.Bit_2, self.registers.A) }
     func res_3_b() -> Void { self.registers.B = clear(.Bit_3, self.registers.B) }
     func res_3_c() -> Void { self.registers.C = clear(.Bit_3, self.registers.C) }
@@ -972,7 +972,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_3_e() -> Void { self.registers.E = clear(.Bit_3, self.registers.E) }
     func res_3_h() -> Void { self.registers.H = clear(.Bit_3, self.registers.H) }
     func res_3_l() -> Void { self.registers.L = clear(.Bit_3, self.registers.L) }
-    func res_3_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_3,mmu.read(address: self.registers.HL))) }
+    func res_3_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_3,mmu.read(address: self.registers.HL))) }
     func res_3_a() -> Void { self.registers.A = clear(.Bit_3, self.registers.A) }
     func res_4_b() -> Void { self.registers.B = clear(.Bit_4, self.registers.B) }
     func res_4_c() -> Void { self.registers.C = clear(.Bit_4, self.registers.C) }
@@ -980,7 +980,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_4_e() -> Void { self.registers.E = clear(.Bit_4, self.registers.E) }
     func res_4_h() -> Void { self.registers.H = clear(.Bit_4, self.registers.H) }
     func res_4_l() -> Void { self.registers.L = clear(.Bit_4, self.registers.L) }
-    func res_4_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_4,mmu.read(address: self.registers.HL))) }
+    func res_4_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_4,mmu.read(address: self.registers.HL))) }
     func res_4_a() -> Void { self.registers.A = clear(.Bit_4, self.registers.A) }
     func res_5_b() -> Void { self.registers.B = clear(.Bit_5, self.registers.B) }
     func res_5_c() -> Void { self.registers.C = clear(.Bit_5, self.registers.C) }
@@ -988,7 +988,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_5_e() -> Void { self.registers.E = clear(.Bit_5, self.registers.E) }
     func res_5_h() -> Void { self.registers.H = clear(.Bit_5, self.registers.H) }
     func res_5_l() -> Void { self.registers.L = clear(.Bit_5, self.registers.L) }
-    func res_5_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_5,mmu.read(address: self.registers.HL))) }
+    func res_5_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_5,mmu.read(address: self.registers.HL))) }
     func res_5_a() -> Void { self.registers.A = clear(.Bit_5, self.registers.A) }
     func res_6_b() -> Void { self.registers.B = clear(.Bit_6, self.registers.B) }
     func res_6_c() -> Void { self.registers.C = clear(.Bit_6, self.registers.C) }
@@ -996,7 +996,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_6_e() -> Void { self.registers.E = clear(.Bit_6, self.registers.E) }
     func res_6_h() -> Void { self.registers.H = clear(.Bit_6, self.registers.H) }
     func res_6_l() -> Void { self.registers.L = clear(.Bit_6, self.registers.L) }
-    func res_6_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_6,mmu.read(address: self.registers.HL))) }
+    func res_6_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_6,mmu.read(address: self.registers.HL))) }
     func res_6_a() -> Void { self.registers.A = clear(.Bit_6, self.registers.A) }
     func res_7_b() -> Void { self.registers.B = clear(.Bit_7, self.registers.B) }
     func res_7_c() -> Void { self.registers.C = clear(.Bit_7, self.registers.C) }
@@ -1004,7 +1004,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func res_7_e() -> Void { self.registers.E = clear(.Bit_7, self.registers.E) }
     func res_7_h() -> Void { self.registers.H = clear(.Bit_7, self.registers.H) }
     func res_7_l() -> Void { self.registers.L = clear(.Bit_7, self.registers.L) }
-    func res_7_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(.Bit_7,mmu.read(address: self.registers.HL))) }
+    func res_7_hlp() -> Void { mmu.write(address: self.registers.HL, val: clear(NegativeByteMask.Bit_7,mmu.read(address: self.registers.HL))) }
     func res_7_a() -> Void { self.registers.A = clear(.Bit_7, self.registers.A) }
     func set_0_b() -> Void { self.registers.B = set(.Bit_0, self.registers.B) }
     func set_0_c() -> Void { self.registers.C = set(.Bit_0, self.registers.C) }
@@ -1012,7 +1012,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_0_e() -> Void { self.registers.E = set(.Bit_0, self.registers.E) }
     func set_0_h() -> Void { self.registers.H = set(.Bit_0, self.registers.H) }
     func set_0_l() -> Void { self.registers.L = set(.Bit_0, self.registers.L) }
-    func set_0_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_0,mmu.read(address: self.registers.HL))) }
+    func set_0_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_0,mmu.read(address: self.registers.HL))) }
     func set_0_a() -> Void { self.registers.A = set(.Bit_0, self.registers.A) }
     func set_1_b() -> Void { self.registers.B = set(.Bit_1, self.registers.B) }
     func set_1_c() -> Void { self.registers.C = set(.Bit_1, self.registers.C) }
@@ -1020,7 +1020,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_1_e() -> Void { self.registers.E = set(.Bit_1, self.registers.E) }
     func set_1_h() -> Void { self.registers.H = set(.Bit_1, self.registers.H) }
     func set_1_l() -> Void { self.registers.L = set(.Bit_1, self.registers.L) }
-    func set_1_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_1,mmu.read(address: self.registers.HL))) }
+    func set_1_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_1,mmu.read(address: self.registers.HL))) }
     func set_1_a() -> Void { self.registers.A = set(.Bit_1, self.registers.A) }
     func set_2_b() -> Void { self.registers.B = set(.Bit_2, self.registers.B) }
     func set_2_c() -> Void { self.registers.C = set(.Bit_2, self.registers.C) }
@@ -1028,7 +1028,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_2_e() -> Void { self.registers.E = set(.Bit_2, self.registers.E) }
     func set_2_h() -> Void { self.registers.H = set(.Bit_2, self.registers.H) }
     func set_2_l() -> Void { self.registers.L = set(.Bit_2, self.registers.L) }
-    func set_2_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_2,mmu.read(address: self.registers.HL))) }
+    func set_2_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_2,mmu.read(address: self.registers.HL))) }
     func set_2_a() -> Void { self.registers.A = set(.Bit_2, self.registers.A) }
     func set_3_b() -> Void { self.registers.B = set(.Bit_3, self.registers.B) }
     func set_3_c() -> Void { self.registers.C = set(.Bit_3, self.registers.C) }
@@ -1036,7 +1036,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_3_e() -> Void { self.registers.E = set(.Bit_3, self.registers.E) }
     func set_3_h() -> Void { self.registers.H = set(.Bit_3, self.registers.H) }
     func set_3_l() -> Void { self.registers.L = set(.Bit_3, self.registers.L) }
-    func set_3_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_3,mmu.read(address: self.registers.HL))) }
+    func set_3_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_3,mmu.read(address: self.registers.HL))) }
     func set_3_a() -> Void { self.registers.A = set(.Bit_3, self.registers.A) }
     func set_4_b() -> Void { self.registers.B = set(.Bit_4, self.registers.B) }
     func set_4_c() -> Void { self.registers.C = set(.Bit_4, self.registers.C) }
@@ -1044,7 +1044,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_4_e() -> Void { self.registers.E = set(.Bit_4, self.registers.E) }
     func set_4_h() -> Void { self.registers.H = set(.Bit_4, self.registers.H) }
     func set_4_l() -> Void { self.registers.L = set(.Bit_4, self.registers.L) }
-    func set_4_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_4,mmu.read(address: self.registers.HL))) }
+    func set_4_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_4,mmu.read(address: self.registers.HL))) }
     func set_4_a() -> Void { self.registers.A = set(.Bit_4, self.registers.A) }
     func set_5_b() -> Void { self.registers.B = set(.Bit_5, self.registers.B) }
     func set_5_c() -> Void { self.registers.C = set(.Bit_5, self.registers.C) }
@@ -1052,7 +1052,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_5_e() -> Void { self.registers.E = set(.Bit_5, self.registers.E) }
     func set_5_h() -> Void { self.registers.H = set(.Bit_5, self.registers.H) }
     func set_5_l() -> Void { self.registers.L = set(.Bit_5, self.registers.L) }
-    func set_5_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_5,mmu.read(address: self.registers.HL))) }
+    func set_5_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_5,mmu.read(address: self.registers.HL))) }
     func set_5_a() -> Void { self.registers.A = set(.Bit_5, self.registers.A) }
     func set_6_b() -> Void { self.registers.B = set(.Bit_6, self.registers.B) }
     func set_6_c() -> Void { self.registers.C = set(.Bit_6, self.registers.C) }
@@ -1060,7 +1060,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_6_e() -> Void { self.registers.E = set(.Bit_6, self.registers.E) }
     func set_6_h() -> Void { self.registers.H = set(.Bit_6, self.registers.H) }
     func set_6_l() -> Void { self.registers.L = set(.Bit_6, self.registers.L) }
-    func set_6_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_6,mmu.read(address: self.registers.HL))) }
+    func set_6_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_6,mmu.read(address: self.registers.HL))) }
     func set_6_a() -> Void { self.registers.A = set(.Bit_6, self.registers.A) }
     func set_7_b() -> Void { self.registers.B = set(.Bit_7, self.registers.B) }
     func set_7_c() -> Void { self.registers.C = set(.Bit_7, self.registers.C) }
@@ -1068,6 +1068,6 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func set_7_e() -> Void { self.registers.E = set(.Bit_7, self.registers.E) }
     func set_7_h() -> Void { self.registers.H = set(.Bit_7, self.registers.H) }
     func set_7_l() -> Void { self.registers.L = set(.Bit_7, self.registers.L) }
-    func set_7_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(.Bit_7,mmu.read(address: self.registers.HL))) }
+    func set_7_hlp() -> Void { mmu.write(address: self.registers.HL, val: set(ByteMask.Bit_7,mmu.read(address: self.registers.HL))) }
     func set_7_a() -> Void { self.registers.A = set(.Bit_7, self.registers.A) }
 }
