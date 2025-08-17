@@ -383,8 +383,8 @@ public class Noise: AudioChannelWithEnveloppe, NoiseChannel {
     }
     override public func trigger() {
         super.trigger()
-        //on trigger re-inits to all 1 bits for its 15bits width
-        self.LFSR = 0b0111_1111_1111_1111
+        //on trigger reset LFSR to 0, no relevant official doc points at a 0x7FFF reset
+        self.LFSR = 0
     }
     
     override public func tick(_ masterCycles: Int, _ frameCycles: Int) {
@@ -396,15 +396,19 @@ public class Noise: AudioChannelWithEnveloppe, NoiseChannel {
             if(self.noiseTimer <= 0){
                 //reload noise timer
                 self.noiseTimer = self.mmu.getNoiseClockDivisor() << self.mmu.getNoiseClockShift()
-                //compute LFSR bit to apply to bit 15 of LFSR (and bit 7 if short mode)
-                let xor:Short = ((self.LFSR & 0b10) >> 1) ^ (self.LFSR & 0b01)
-                //shift LFSR right then store xor at 15bit position
-                self.LFSR = (self.LFSR >> 1) | (xor << 14)
-                //in case of short width store it at bit 7 too
+                //compute LFSR bit to apply (Not XOR between bit 0 and 1)
+                let xor:Short = ~(((self.LFSR & 0b10) >> 1) ^ (self.LFSR & 0b01))
+                //store xor at corresponding bit according to noise width
                 if(self.mmu.hasNoiseShortWidth()){
-                    self.LFSR = (self.LFSR & 0b1111_1111_1011_1111) //clear bit 7 in lfsr
-                              | (xor << 6)                          //store bit 7 at bit 7
+                    self.LFSR = clear(.Bit_7, self.LFSR)
+                    self.LFSR |= xor << 7
                 }
+                else {
+                    self.LFSR = clear(.Bit_15, self.LFSR)
+                    self.LFSR |= xor << 15
+                }
+                //shift LFSR by 1
+                self.LFSR >>= 1
             }
         }
         super.tick(masterCycles, frameCycles)
@@ -414,8 +418,8 @@ public class Noise: AudioChannelWithEnveloppe, NoiseChannel {
     public override var amplitude:Byte {
         get {
             if(self.enabled){
-                //amplitude is equal to LFSR bit 1 value (0 or 1) multiplied by volume (byte value)
-                return Byte(self.LFSR & 0b0000_0000_0000_0001) == 0 ? self.volume : 0
+                //amplitude is equal to LFSR bit 0 value. 0 no volume, 1 volume (shorthand by multiplied)
+                return Byte(self.LFSR & 0b0000_0000_0000_0001) * self.volume
             }
             else {
                 return 0
