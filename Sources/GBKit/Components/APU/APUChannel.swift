@@ -3,6 +3,9 @@ public protocol APUChannel: Component, Clockable {
     /// can be seen as channel value
     var amplitude:Byte { get }
     
+    /// amplitude once processed by DAC
+    var analogAmplitude:Float { get }
+    
     /// true if enabled
     var enabled:Bool { get set }
     

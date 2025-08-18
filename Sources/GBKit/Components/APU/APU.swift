@@ -9,14 +9,6 @@ public typealias AudioSample = (L:Float, R:Float)
 ///Function to be passed that will play input sample buffer, it's your responsability to interleaved L and R channel sample
 public typealias PlayCallback = (_ samples:[AudioSample]) -> Void
 
-///how AudioSampleNormalization are normalized
-public enum AudioSampleNormalization {
-    ///samples values ranged from 0 to 255
-    case RAW
-    ///samples will be normalized as values ranged from -1.0 to 1.0
-    case FLOAT_MINUS_1_TO_1
-}
-
 ///Configuration to provide to APU,
 public struct APUConfiguration {
     ///Audio sample rate (in Hz)
@@ -26,19 +18,14 @@ public struct APUConfiguration {
     ///Amount of sample to store
     public let bufferSize:Int
     
-    ///normalization method
-    public let normalizationMethod:AudioSampleNormalization
-    
     ///Callback tha will be called once buffer size has been riched
     public let playback:PlayCallback
     
     public init(sampleRate: Int,
                 bufferSize: Int,
-                normalizationMethod: AudioSampleNormalization,
                 playback: PlayCallback?) {
         self.sampleRate = sampleRate
         self.bufferSize = bufferSize
-        self.normalizationMethod = normalizationMethod
         self.playback = playback!
     }
     
@@ -52,7 +39,6 @@ public struct APUConfiguration {
     public static let DEFAULT:APUConfiguration = APUConfiguration(
         sampleRate: 44100,
         bufferSize: 256,
-        normalizationMethod: .RAW,
         playback: { _ in } )
 }
 
@@ -105,12 +91,6 @@ public class APU: Component, Clockable, APUProxy {
         }
     }
     
-    ///to avoid useless computation when normalized is prompted, map each value from 0 to 255 with its counterpart between 0.0 and 1.0
-    private let byteToFloatMap_Zero_To_One:[Float] = Array(0 ... Int(Byte.max)).map { Float($0) / 255.0 }
-    
-    ///to avoid useless computation when normalized is prompted, map each value from 0 to 255 with its counterpart between -1.0 and 1.0
-    private let byteToFloatMap_Minus_One_To_One:[Float] = Array(0 ... Int(Byte.max)).map { ((Float($0) / Float(Byte.max)) * 2.0) - 1.0 }
-    
     private var _audioBuffer:[AudioSample] = []
     /// last commited audio buffer, ready to play
     public var audioBuffer:[AudioSample] {
@@ -120,8 +100,8 @@ public class APU: Component, Clockable, APUProxy {
         }
     }
     
-    //next audio buffer (note that this buffer is not normalized)
-    private var nextBuffer:[RawAudioSample] = []
+    //next audio buffer
+    private var nextBuffer:[AudioSample] = []
     
     //timer to generate timer
     private var sampleTimer = 0
@@ -203,20 +183,12 @@ public class APU: Component, Clockable, APUProxy {
     
     /// set current buffer as ready to use
     private func commitBuffer() {
-        //convert raw audio buffer to normalized buffer
-        switch(self.configuration.normalizationMethod){
-        case .RAW:
-            self._audioBuffer = self.nextBuffer.map { (L:Float($0.L), R:Float($0.R)) }
-        case .FLOAT_MINUS_1_TO_1:
-            self._audioBuffer = self.nextBuffer.map {
-                let sample = (L:self.byteToFloatMap_Minus_One_To_One[$0.L],
-                              R:self.byteToFloatMap_Minus_One_To_One[$0.R])
-                //apply HPF if required
-                if(self.configuration.isHPFEnabled){
-                    return self.applyHighPassFilter(sample)
-                }
-                return sample
+        self._audioBuffer = self.nextBuffer.map {
+            //apply HPF if required
+            if(self.configuration.isHPFEnabled){
+                return self.applyHighPassFilter($0)
             }
+            return $0
         }
     }
     
@@ -268,62 +240,62 @@ public class APU: Component, Clockable, APUProxy {
     }
     
     /// return L and R sample by mixing each channel amplitude
-    func sample() -> RawAudioSample {
+    func sample() -> AudioSample {
         let panning = self.mmu.getAPUChannelPanning()
         let volume  = self.mmu.getMasterVolume()
         //todo handle VIN (audio comming from cartridge)
         
         //sample to build
-        var leftSample:Int  = 0;
-        var rightSample:Int = 0;
+        var leftSample:Float  = 0;
+        var rightSample:Float = 0;
         
         //apply panning
         
         //CH1
         if(self.configuration.isChannel1Enabled){
             if(panning.CH1_L){
-                leftSample += Int(self.channel1.amplitude)
+                leftSample += self.channel1.analogAmplitude
             }
             if(panning.CH1_R){
-                rightSample += Int(self.channel1.amplitude)
+                rightSample += self.channel1.analogAmplitude
             }
         }
         
         //CH2
         if(self.configuration.isChannel2Enabled){
             if(panning.CH2_L){
-                leftSample += Int(self.channel2.amplitude)
+                leftSample += self.channel2.analogAmplitude
             }
             if(panning.CH2_R){
-                rightSample += Int(self.channel2.amplitude)
+                rightSample += self.channel2.analogAmplitude
             }
         }
         
         //CH3
         if(self.configuration.isChannel3Enabled){
             if(panning.CH3_L){
-                leftSample += Int(self.channel3.amplitude)
+                leftSample += self.channel3.analogAmplitude
             }
             if(panning.CH3_R){
-                rightSample += Int(self.channel3.amplitude)
+                rightSample += self.channel3.analogAmplitude
             }
         }
         
         //CH4
         if(self.configuration.isChannel4Enabled) {
             if(panning.CH4_L){
-                leftSample += Int(self.channel4.amplitude)
+                leftSample += self.channel4.analogAmplitude
             }
             if(panning.CH4_R){
-                rightSample += Int(self.channel4.amplitude)
+                rightSample += self.channel4.analogAmplitude
             }
         }
         
         //return sample by applying master volume
         // divide each sample             by 4, as we have summed up all 4 channel amplitudes
         // divide volume multiplied value by 7, as volume is stored on 3 bits (max value = 0b111 -> 7)
-        return (L: ((leftSample  / 4) * Int(volume.L)) / 7,
-                R: ((rightSample / 4) * Int(volume.R)) / 7)
+        return (L: ((leftSample  / 4.0) * Float(volume.L)) / 7.0,
+                R: ((rightSample / 4.0) * Float(volume.R)) / 7.0)
     }
     
     public func reset() {

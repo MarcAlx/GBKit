@@ -30,6 +30,15 @@ public class AudioChannel: CoreAudioChannel {
         }
     }
     
+    /// look up table for digital to analog conversion
+    /// the digital range of each channel (0x0 to 0xF) is mapped to the following analog range -1 to 1 (with negative slope 0x0 is 1 and 0xF is -1)
+    private let amplitudeConversionLUT:[Float] = Array(0 ... 0xF).map { 1.0 - (Float($0)/Float(0xF))*2.0  }
+    
+    public var analogAmplitude: Float {
+        //map Digital aplitude to its analog precomputed value (& 0xf to avoid overflow)
+        self.amplitudeConversionLUT[Int(self.amplitude & 0xF)]
+    }
+    
     public init(mmu: MMU) {
         self.mmu = mmu
     }
