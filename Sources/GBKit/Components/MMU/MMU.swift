@@ -345,7 +345,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
     
     public func hasNoiseShortWidth() -> Bool {
         //if bit 3 of NR43 is set then noise has short width
-        return (self[IOAddresses.AUDIO_NR43.rawValue] & 0b0000_1000 >> 3) > 0
+        return ((self[IOAddresses.AUDIO_NR43.rawValue] & 0b0000_1000) >> 3) > 0
     }
     
     public func getNoiseClockDivisor() -> Int {
