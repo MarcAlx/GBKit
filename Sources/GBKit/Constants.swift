@@ -133,11 +133,11 @@ public struct GameBoyConstants {
         IOAddresses.AUDIO_NR44.rawValue
     ]
     
-    //register to control enveloppe
-    public let EnveloppeControlRegisters:[Short] = [
+    //register to control envelope
+    public let EnvelopeControlRegisters:[Short] = [
         IOAddresses.AUDIO_NR12.rawValue,
         IOAddresses.AUDIO_NR22.rawValue,
-        //no channel 3 is intentionnal, it doesn't support enveloppe
+        //no channel 3 is intentionnal, it doesn't support envelope
         IOAddresses.AUDIO_NR42.rawValue,
     ]
     

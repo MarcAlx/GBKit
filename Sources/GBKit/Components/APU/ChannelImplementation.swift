@@ -88,50 +88,50 @@ public class AudioChannel: CoreAudioChannel {
     }
 }
 
-///a super class for channel with enveloppe
-public class AudioChannelWithEnveloppe: AudioChannel, EnveloppableChannel{
-    //channel volume, only for enveloppe one, (n.b wave channel has its own volume behavior)
+///a super class for channel with envelope
+public class AudioChannelWithEnvelope: AudioChannel, EnveloppableChannel{
+    //channel volume, only for envelope one, (n.b wave channel has its own volume behavior)
     public internal(set) var volume:Byte = 0
     
-    public var enveloppeId: EnveloppableAudioChannelId {
+    public var envelopeId: EnveloppableAudioChannelId {
         get {
             return EnveloppableAudioChannelId.CH1 //override in sublcass
         }
     }
     
-    private var enveloppePace:Byte = 0
-    private var enveloppeTimer:Byte = 0
-    //if enveloppe direction is up -> true, else direction down so false
-    private var isEnveloppeDirectionUp:Bool = false
+    private var envelopePace:Byte = 0
+    private var envelopeTimer:Byte = 0
+    //if envelope direction is up -> true, else direction down so false
+    private var isEnvelopeDirectionUp:Bool = false
     
     override public func trigger() {
         super.trigger()
         
         //init volume with initial value
-        self.volume = self.mmu.getEnveloppeInitialVolume(self.enveloppeId)
+        self.volume = self.mmu.getEnvelopeInitialVolume(self.envelopeId)
         //reset sweep pace
-        self.enveloppePace = self.mmu.getEnveloppeSweepPace(self.enveloppeId)
-        self.enveloppeTimer = self.enveloppePace
-        //save enveloppe direction
-        self.isEnveloppeDirectionUp = self.mmu.getEnveloppeDirection(self.enveloppeId) == 1
+        self.envelopePace = self.mmu.getEnvelopeSweepPace(self.envelopeId)
+        self.envelopeTimer = self.envelopePace
+        //save envelope direction
+        self.isEnvelopeDirectionUp = self.mmu.getEnvelopeDirection(self.envelopeId) == 1
     }
     
-    public func tickEnveloppe() {
-        //a pacing of 0 means enveloppe is disabled
-        if(self.enveloppePace != 0){
+    public func tickEnvelope() {
+        //a pacing of 0 means envelope is disabled
+        if(self.envelopePace != 0){
             //every tick decrease pace
-            if(self.enveloppeTimer>0){
-                self.enveloppeTimer -= 1
+            if(self.envelopeTimer>0){
+                self.envelopeTimer -= 1
             }
-            //it's time to apply enveloppe
-            if(self.enveloppeTimer == 0){
-                self.enveloppeTimer = self.enveloppePace //re-arm timer with initial value (n.b needs retrigger to re-read mmu value)
+            //it's time to apply envelope
+            if(self.envelopeTimer == 0){
+                self.envelopeTimer = self.envelopePace //re-arm timer with initial value (n.b needs retrigger to re-read mmu value)
                 
-                //enveloppe is only applied for a volume between 0x0 and 0xF (15)
-                if(self.volume < 0xF && self.isEnveloppeDirectionUp) {
+                //envelope is only applied for a volume between 0x0 and 0xF (15)
+                if(self.volume < 0xF && self.isEnvelopeDirectionUp) {
                     self.volume += 1
                 }
-                else if(self.volume > 0x0 && !self.isEnveloppeDirectionUp) {
+                else if(self.volume > 0x0 && !self.isEnvelopeDirectionUp) {
                     self.volume -= 1
                 }
             }
@@ -250,7 +250,7 @@ public class Sweep: Pulse, SquareWithSweepChannel {
 }
 
 /// channel 2 is a square channel
-public class Pulse: AudioChannelWithEnveloppe, SquareChannel {
+public class Pulse: AudioChannelWithEnvelope, SquareChannel {
     
     override public var id: AudioChannelId {
         AudioChannelId.CH2
@@ -379,7 +379,7 @@ public class Wave: AudioChannel, WaveChannel {
 }
 
 /// channel 4 is a noise channel
-public class Noise: AudioChannelWithEnveloppe, NoiseChannel {
+public class Noise: AudioChannelWithEnvelope, NoiseChannel {
     
     //timer at which noise is updated
     private var noiseTimer:Int = 0

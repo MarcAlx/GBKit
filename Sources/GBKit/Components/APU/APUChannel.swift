@@ -42,13 +42,13 @@ public protocol PeriodicChannel {
     var periodId:ChannelWithPeriodId { get }
 }
 
-/// channel that supports enveloppe control
+/// channel that supports envelope control
 public protocol EnveloppableChannel {
     ///channel id
-    var enveloppeId:EnveloppableAudioChannelId { get }
+    var envelopeId:EnveloppableAudioChannelId { get }
     
     /// tick volume
-    func tickEnveloppe()
+    func tickEnvelope()
 }
 
 /// an audio channel is clockable component with length, since all channel have Length cover it in protocol class
@@ -60,13 +60,13 @@ public protocol CoreAudioChannel: Component,
     func registerAPU(apu: APUProxy)
 }
 
-/// square1 channel support length and enveloppe control
+/// square1 channel support length and envelope control
 public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnveloppableChannel {
     ///square id
     var squareId:DutyAudioChannelId { get }
 }
 
-/// square2 channel  support length and enveloppe control along with sweep control
+/// square2 channel  support length and envelope control along with sweep control
 public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnveloppableChannel, SweepableChannel {
 }
 
@@ -74,6 +74,6 @@ public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, Lengt
 public protocol WaveChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, VolumableChannel {
 }
 
-/// noise channel supports length and enveloppe control
+/// noise channel supports length and envelope control
 public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnveloppableChannel {
 }

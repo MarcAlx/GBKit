@@ -6,7 +6,7 @@ public enum AudioChannelId:Int {
     case CH4 = 3
 }
 
-///maps each Audio channel that supports enveloppe to an int value, ease further indexing
+///maps each Audio channel that supports envelope to an int value, ease further indexing
 public enum EnveloppableAudioChannelId:Int {
     case CH1 = 0
     case CH2 = 1
@@ -94,14 +94,14 @@ public protocol AudioInterface {
     /// reset trigger for a channel
     func resetTrigger(_ channel:AudioChannelId)
     
-    ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
-    func getEnveloppeDirection(_ channel:EnveloppableAudioChannelId) -> Byte
+    ///returns envelope direction, 0 -> Descreasing, 1-> Increasing
+    func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte
     
-    ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    func getEnveloppeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte
+    ///returns envelope pace, every each envelope tick of this value envelope is applied
+    func getEnvelopeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte
     
-    ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    func getEnveloppeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte
+    ///returns envelope pace, every each envelope tick of this value envelope is applied
+    func getEnvelopeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte
     
     ///return sweep pace (nb of iteration before sweep is applied)
     func getSweepPace() -> Byte

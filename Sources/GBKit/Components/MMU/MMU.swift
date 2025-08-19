@@ -308,19 +308,19 @@ public class MMU: MMUCore, InterruptsControlInterface,
         self[addr] = self.directRead(address: addr) & NegativeByteMask.Bit_7.rawValue
     }
     
-    ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
-    public func getEnveloppeDirection(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return (self.directRead(address: GBConstants.EnveloppeControlRegisters[channel.rawValue]) & 0b0000_1000) >> 3;
+    ///returns envelope direction, 0 -> Descreasing, 1-> Increasing
+    public func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte {
+        return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_1000) >> 3;
     }
     
-    ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    public func getEnveloppeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return self.directRead(address: GBConstants.EnveloppeControlRegisters[channel.rawValue]) & 0b0000_0111;
+    ///returns envelope pace, every each envelope tick of this value envelope is applied
+    public func getEnvelopeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte {
+        return self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_0111;
     }
     
-    ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    public func getEnveloppeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return (self.directRead(address: GBConstants.EnveloppeControlRegisters[channel.rawValue]) & 0b1111_0000) >> 4;
+    ///returns envelope pace, every each envelope tick of this value envelope is applied
+    public func getEnvelopeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte {
+        return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b1111_0000) >> 4;
     }
     
     public func getSweepPace() -> Byte {

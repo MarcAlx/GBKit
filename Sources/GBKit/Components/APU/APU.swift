@@ -227,9 +227,9 @@ public class APU: Component, Clockable, APUProxy {
             self.channel1.tickSweep()
             break
         case 7:
-            self.channel1.tickEnveloppe()
-            self.channel2.tickEnveloppe()
-            self.channel4.tickEnveloppe()
+            self.channel1.tickEnvelope()
+            self.channel2.tickEnvelope()
+            self.channel4.tickEnvelope()
             break
         default:
             break
