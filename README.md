@@ -12,7 +12,7 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 - (Done) CPU
 - (Done) PPU
-- (In development) APU, status: audio is produced yet innacurate (goal is to pass dmg-sound test roms)
+- (In development) APU, status: audio is produced yet innacurate
 - (TODO) MBC handling
 - (TODO) Finish unit tests
 - (Next) Move from `XCTest` to new Swift `Testing`
@@ -22,7 +22,7 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 ![](./doc/architecture.png)
 
-From a game rom, inputs, audio configuration and 60fps timing GBKit produces video frames and audio buffers.
+From a game rom, inputs, audio/video configurations and 60fps timing GBKit produces video frames and audio samples.
 
 ### Components dependency tree
 
@@ -32,12 +32,14 @@ graph TB;
   MB[MotherBoard]
   CPU[CPU]
   MMU[MMU]
-  APU[APU]
-  IO[I/O interface]
+  APU[APU]           
+  LCDI[LCDInterface]
+  TIMI[TimerInterface]
+  JOYI[JoyPadInterface]
+  AUDIOI[AudioInterface]
   JOY[JoyPad]
   R[Registers]
-  INT[Interrupts interface]
-  PM[Palette Manager]
+  INT[Interrupts control interface]
   TIM[Timer]
 
   GB --> MB;
@@ -49,8 +51,11 @@ graph TB;
   MB --> APU;
   MB --> TIM;
 
-  MMU --> IO;
   MMU --> INT;
+  MMU --> LCDI;
+  MMU --> JOYI;
+  MMU --> AUDIOI;
+  MMU --> TIMI;
 
   CPU --> MMU;
   CPU --> R
@@ -58,8 +63,6 @@ graph TB;
   JOY --> MMU;
   TIM --> MMU;
   APU --> MMU;
-
-  PPU --> PM;
 ```
 
 ## Timing equivalency
@@ -108,7 +111,7 @@ Passing:
 
   n.b requires CPU to decompose its instruction to reflect mmu state
 
- #### APU (WIP)
+ #### APU
 
   Passing :
   
@@ -116,7 +119,7 @@ Passing:
 
   Non passing:
 
-  - 02-len ctr.gb 
+  - 02-len ctr.gb
   - 03-trigger.gb 
   - 04-sweep.gb 
   - 05-sweep details.gb 
@@ -188,6 +191,9 @@ This project contains some unit tests, objective is to test each core fonction o
 - [GhostBoy (c++)](https://github.com/GhostSonic21/GhostBoy)
 - [AXWGameBoy (go)](https://github.com/ArcticXWolf/AXWGameboy)
 - [Argentum (rust)](https://github.com/NightShade256/Argentum)
+- [TLMBoy (c++)](https://github.com/not-chciken/TLMBoy)
+- [ayyboy (rust)](https://github.com/ioncodes/ayyboy)
+
 
 ### Worth reading articles
 
@@ -218,6 +224,9 @@ This project contains some unit tests, objective is to test each core fonction o
 - [Gameboy sound hardware](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
 - [GBSOUND.txt](https://www.devrs.com/gb/files/hosted/GBSOUND.txt)
 - [Nitty Gritty Gameboy Cycle Timing.txt](http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt)
+- [TLMBoy: The Audio Processing Unit (APU) - Square Channel](https://www.chciken.com/tlmboy/2025/03/28/gameboy-apu-square.html)
+- [TLMBoy: The Audio Processing Unit (APU) - Noise Channel](https://www.chciken.com/tlmboy/2025/03/24/gameboy-apu-noise.html)
+
 
 ### forums / threads / questions
 
