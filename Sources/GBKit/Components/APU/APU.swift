@@ -1,3 +1,5 @@
+import Foundation
+
 //not normalized audio sample (int value randed from 0 to 255
 typealias RawAudioSample = (L:Int, R:Int)
 
@@ -6,14 +8,6 @@ public typealias AudioSample = (L:Float, R:Float)
 
 ///Function to be passed that will play input sample buffer, it's your responsability to interleaved L and R channel sample
 public typealias PlayCallback = (_ samples:[AudioSample]) -> Void
-
-///how AudioSampleNormalization are normalized
-public enum AudioSampleNormalization {
-    ///samples values ranged from 0 to 255
-    case RAW
-    ///samples will be normalized as values ranged from -1.0 to 1.0
-    case FLOAT_MINUS_1_TO_1
-}
 
 ///Configuration to provide to APU,
 public struct APUConfiguration {
@@ -24,52 +18,55 @@ public struct APUConfiguration {
     ///Amount of sample to store
     public let bufferSize:Int
     
-    ///normalization method
-    public let normalizationMethod:AudioSampleNormalization
-    
     ///Callback tha will be called once buffer size has been riched
     public let playback:PlayCallback
     
     public init(sampleRate: Int,
                 bufferSize: Int,
-                normalizationMethod: AudioSampleNormalization,
                 playback: PlayCallback?) {
         self.sampleRate = sampleRate
         self.bufferSize = bufferSize
-        self.normalizationMethod = normalizationMethod
         self.playback = playback!
     }
     
+    public var isChannel1Enabled:Bool = true
+    public var isChannel2Enabled:Bool = true
+    public var isChannel3Enabled:Bool = true
+    public var isChannel4Enabled:Bool = true
+    public var isHPFEnabled:Bool = true
+    
     ///default configuration, mainly for init purpose
     public static let DEFAULT:APUConfiguration = APUConfiguration(
-        sampleRate: 441000,
+        sampleRate: 44100,
         bufferSize: 256,
-        normalizationMethod: .RAW,
         playback: { _ in } )
 }
 
 public class APU: Component, Clockable, APUProxy {
-    //true if enabled
+    /// true if enabled
     private var enabled = false
-    
-    ///buffer filled with 0.0 to express silence
+    /// buffer filled with 0.0 to express silence
     public private(set) var SILENT_BUFFER:[AudioSample] = []
     
     public private(set) var cycles:Int = 0
-    
     private let mmu:MMU
     
+    /// counter for frame sequencer
     private var frameSequencerCounter:Int = 0
-    
+    /// current step of frame sequencer
     private var frameSequencerStep:Int = 0
     
-    private var channel1:SquareWithSweepChannel
-    private var channel2:SquareChannel
-    private var channel3:WaveChannel
-    private var channel4:NoiseChannel
+    /// capacitor for L high pass filter
+    private var hpfCapacitorL: Float = 0.0
+    /// capacitor for R high pass filter
+    private var hpfCapacitorR: Float = 0.0
+    /// charge factor for high pass filter
+    private var hpfChargeFactor: Float = 0.0
     
-    //shorthand
-    private let channels:[AudioChannel]
+    public var channel1:SquareWithSweepChannel
+    public var channel2:SquareChannel
+    public var channel3:WaveChannel
+    public var channel4:NoiseChannel
     
     //rate (in M tick) at which we sample
     private var sampleTickRate:Int = 0
@@ -85,14 +82,13 @@ public class APU: Component, Clockable, APUProxy {
             self._audioBuffer = self.SILENT_BUFFER
             //init sample rate, we will tick every sampleRate fraction of CPUSpeed (both are expressed in the same unit Hz)
             self.sampleTickRate = GBConstants.CPUSpeed / newValue.sampleRate
+            //pre-compute charge factor
+            self.hpfChargeFactor = self.computeHPFChargeFactor()
         }
         get {
             self._configuration
         }
     }
-    
-    ///to avoid useless computation when normalized is prompted, map each value from 0 to 255 with its counterpart between 0.0 and 1.0
-    private let byteToFloatMap:[Float] = Array(0 ..< Int(Byte.max)+1 ).map { Float($0) / 255.0 }
     
     private var _audioBuffer:[AudioSample] = []
     /// last commited audio buffer, ready to play
@@ -103,38 +99,77 @@ public class APU: Component, Clockable, APUProxy {
         }
     }
     
-    //next audio buffer (note that this buffer is not normalized)
-    private var nextBuffer:[RawAudioSample] = []
+    //next audio buffer
+    private var nextBuffer:[AudioSample] = []
     
     //timer to generate timer
     private var sampleTimer = 0
     
+    public var willTickLength:Bool {
+        get {
+            let nextStep = self.frameSequencerStep + 1
+            return nextStep == 0
+                || nextStep == 2
+                || nextStep == 4
+                || nextStep == 6
+        }
+    }
+    
+    public var willTickEnvelope:Bool {
+        get {
+            self.frameSequencerStep + 1 == 7
+        }
+    }
+
+    
+    public func readNR52() -> Byte {
+        return (self.enabled ? 0b1000_0000 : 0) //only bit 7 is writable
+             | 0b0111_0000 //bits 6 5 4 are always 1 on read
+             //bits 3 2 1 0 depends on channel state
+             | (self.isCH4Enabled ? 0b0000_1000 : 0)
+             | (self.isCH3Enabled ? 0b0000_0100 : 0)
+             | (self.isCH2Enabled ? 0b0000_0010 : 0)
+             | (self.isCH1Enabled ? 0b0000_0001 : 0);
+    }
+    
+    public func writeNR52(value:Byte) {
+        let willEnable = isBitSet(ByteMask.Bit_7, value)
+        //apu is enabled and will disable
+        if(self.isAPUEnabled && !willEnable) {
+            //turn off all channel
+            self.isCH1Enabled = false;
+            self.isCH2Enabled = false;
+            self.isCH3Enabled = false;
+            self.isCH4Enabled = false;
+            //disabling should clear all audio registers except NR52
+            for addr in MMUAddressSpaces.AUDIO_REGISTERS {
+                self.mmu[addr] = 0
+            }
+        }
+        //apu is disabled and will enabled
+        else if(!self.isAPUEnabled && willEnable) {
+            //this doesn't enable all channel, it's up to developper to re-enable each
+        }
+        //notify enable
+        self.isAPUEnabled = willEnable
+    }
+    
     init(mmu:MMU) {
         self.mmu = mmu
-        let sweep:Sweep = Sweep(mmu: self.mmu)
-        let pulse:Pulse = Pulse(mmu: self.mmu)
-        let wave:Wave   = Wave(mmu:  self.mmu)
-        let noise:Noise = Noise(mmu: self.mmu)
-        self.channel1 = sweep
-        self.channel2 = pulse
-        self.channel3 = wave
-        self.channel4 = noise
-        self.channels = [sweep, pulse, wave, noise]
+        self.channel1 = Sweep()
+        self.channel2 = Pulse()
+        self.channel3 = Wave()
+        self.channel4 = Noise()
         
         //ensure configuration related properties are set on init
         self.configuration = APUConfiguration.DEFAULT
         
-        //register to mmu
+        //register where needed
         self.mmu.registerAPU(apu: self)
-    }
-    
-    /// initis length timer for a given channel using value from an NRX1 register
-    public func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte){
-        //get channel index
-        let chIdx:Int = channel.rawValue;
-        //timer is set to Default values minus masked part of nrx1 value
-        self.channels[chIdx].lengthTimer = GBConstants.DefaultLengthTimer[chIdx]
-                                         - Int((nrx1Value & GBConstants.NRX1_lengthMask[chIdx]))
+        self.channel1.registerAPU(apu: self)
+        self.channel2.registerAPU(apu: self)
+        self.channel3.registerAPU(apu: self)
+        self.channel4.registerAPU(apu: self)
     }
     
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
@@ -169,19 +204,17 @@ public class APU: Component, Clockable, APUProxy {
                 //ready for next buffer
                 self.nextBuffer = []
             }
-            
-            self.mmu.registerAPU(apu: self)
         }
     }
     
     /// set current buffer as ready to use
     private func commitBuffer() {
-        //convert raw audio buffer to normalized buffer
-        switch(self.configuration.normalizationMethod){
-        case .RAW:
-            self._audioBuffer = self.nextBuffer.map { (L:Float($0.L), R:Float($0.R)) }
-        case .FLOAT_MINUS_1_TO_1:
-            self._audioBuffer = self.nextBuffer.map { (L:self.byteToFloatMap[$0.L], R:self.byteToFloatMap[$0.L]) }
+        self._audioBuffer = self.nextBuffer.map {
+            //apply HPF if required
+            if(self.configuration.isHPFEnabled){
+                return self.applyHighPassFilter($0)
+            }
+            return $0
         }
     }
     
@@ -220,9 +253,9 @@ public class APU: Component, Clockable, APUProxy {
             self.channel1.tickSweep()
             break
         case 7:
-            self.channel1.tickEnveloppe()
-            self.channel2.tickEnveloppe()
-            self.channel4.tickEnveloppe()
+            self.channel1.tickEnvelope()
+            self.channel2.tickEnvelope()
+            self.channel4.tickEnvelope()
             break
         default:
             break
@@ -233,54 +266,62 @@ public class APU: Component, Clockable, APUProxy {
     }
     
     /// return L and R sample by mixing each channel amplitude
-    func sample() -> RawAudioSample {
+    func sample() -> AudioSample {
         let panning = self.mmu.getAPUChannelPanning()
         let volume  = self.mmu.getMasterVolume()
         //todo handle VIN (audio comming from cartridge)
         
         //sample to build
-        var leftSample:Int  = 0;
-        var rightSample:Int = 0;
+        var leftSample:Float  = 0;
+        var rightSample:Float = 0;
         
         //apply panning
         
         //CH1
-        if(panning.CH1_L){
-            leftSample += Int(self.channel1.amplitude)
-        }
-        if(panning.CH1_R){
-            rightSample += Int(self.channel1.amplitude)
+        if(self.configuration.isChannel1Enabled){
+            if(panning.CH1_L){
+                leftSample += self.channel1.analogAmplitude
+            }
+            if(panning.CH1_R){
+                rightSample += self.channel1.analogAmplitude
+            }
         }
         
         //CH2
-        if(panning.CH2_L){
-            leftSample += Int(self.channel2.amplitude)
-        }
-        if(panning.CH2_R){
-            rightSample += Int(self.channel2.amplitude)
+        if(self.configuration.isChannel2Enabled){
+            if(panning.CH2_L){
+                leftSample += self.channel2.analogAmplitude
+            }
+            if(panning.CH2_R){
+                rightSample += self.channel2.analogAmplitude
+            }
         }
         
         //CH3
-        if(panning.CH3_L){
-            leftSample += Int(self.channel3.amplitude)
-        }
-        if(panning.CH3_R){
-            rightSample += Int(self.channel3.amplitude)
+        if(self.configuration.isChannel3Enabled){
+            if(panning.CH3_L){
+                leftSample += self.channel3.analogAmplitude
+            }
+            if(panning.CH3_R){
+                rightSample += self.channel3.analogAmplitude
+            }
         }
         
         //CH4
-        if(panning.CH4_L){
-            leftSample += Int(self.channel4.amplitude)
-        }
-        if(panning.CH4_R){
-            rightSample += Int(self.channel4.amplitude)
+        if(self.configuration.isChannel4Enabled) {
+            if(panning.CH4_L){
+                leftSample += self.channel4.analogAmplitude
+            }
+            if(panning.CH4_R){
+                rightSample += self.channel4.analogAmplitude
+            }
         }
         
         //return sample by applying master volume
         // divide each sample             by 4, as we have summed up all 4 channel amplitudes
         // divide volume multiplied value by 7, as volume is stored on 3 bits (max value = 0b111 -> 7)
-        return (L: ((leftSample  / 4) * Int(volume.L)) / 7,
-                R: ((rightSample / 4) * Int(volume.R)) / 7)
+        return (L: ((leftSample  / 4.0) * Float(volume.L)) / 7.0,
+                R: ((rightSample / 4.0) * Float(volume.R)) / 7.0)
     }
     
     public func reset() {
@@ -289,14 +330,22 @@ public class APU: Component, Clockable, APUProxy {
         self.channel2.reset()
         self.channel3.reset()
         self.channel4.reset()
-        
-        //ensure channels state matches mmu state
-        let nr52 = self.mmu[IOAddresses.AUDIO_NR52.rawValue]
-        self.enabled = isBitSet(ByteMask.Bit_7, nr52)
-        self.channel4.enabled = isBitSet(ByteMask.Bit_3, nr52)
-        self.channel3.enabled = isBitSet(ByteMask.Bit_2, nr52)
-        self.channel2.enabled = isBitSet(ByteMask.Bit_1, nr52)
-        self.channel1.enabled = isBitSet(ByteMask.Bit_0, nr52)
+        //clear APU registers
+        self.writeNR52(value: 0)
+    }
+    
+    /// apply HPF to input sample
+    private func applyHighPassFilter(_ input: AudioSample) -> AudioSample {
+        let outL = input.L - hpfCapacitorL
+        let outR = input.R - hpfCapacitorR
+        hpfCapacitorL = input.L - outL * self.hpfChargeFactor
+        hpfCapacitorR = input.R - outR * self.hpfChargeFactor
+        return (L: outL, R: outR)
+    }
+    
+    /// return HPF charge factor for current sample rate
+    private func computeHPFChargeFactor() -> Float {
+        return pow(GBConstants.APUHighPassFilterDefaultCharge, Float(GBConstants.CPUSpeed) / Float(configuration.sampleRate))
     }
     
     /// mark: APUProxy

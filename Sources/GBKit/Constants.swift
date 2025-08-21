@@ -61,7 +61,7 @@ public struct GameBoyConstants {
     public let RAMSize:Int = 0xFFFF+1
 
     //opcode to lookup for extended instructions
-    public let ExtentedInstructionSetOpcode:Byte = 0xCB
+    public let ExtendedInstructionSetOpcode:Byte = 0xCB
     
     //Div timer frequency in T cycle, (DIV increments at 16384Hz so 4194304 (T) / 16384 (T) = 256 (T)
     public let DivTimerFrequency:Int = 256;
@@ -69,20 +69,17 @@ public struct GameBoyConstants {
     //APU frame sequencer frequency, 512hz
     public let APUFrameSequencerFrequency:Int = 512
     
-    //APU is slower than CPU by this divider
-    public let APUSpeedDivider:Int = 2
-    
-    //Channel with Enveloppe are slower relative to APU
-    public let EnveloppeRelativeSpeedDivider:Int = 2
-    
-    //Speed divider relative to CPU speed
-    public let EnveloppeAbsoluteSpeedDivider:Int
+    //Wave channel is 2 times faster than other audio channel
+    public let WaveChannelSpeedFactor: Int = 2
     
     //length on an APU frame sequencer step
     public let APUFrameSequencerStepLength:Int
     
     //value used to determine audio channel frequency
     public let APUPeriodDivider:Int = 2048
+    
+    //charge used for APU's HPF
+    public let APUHighPassFilterDefaultCharge:Float = 0.999958
     
     //duty patterns indexed to their matching NR11 and NR21 value
     public let DutyPatterns:[[Byte]] = [
@@ -136,11 +133,11 @@ public struct GameBoyConstants {
         IOAddresses.AUDIO_NR44.rawValue
     ]
     
-    //register to control enveloppe
+    //register to control envelope
     public let EnvelopeControlRegisters:[Short] = [
         IOAddresses.AUDIO_NR12.rawValue,
         IOAddresses.AUDIO_NR22.rawValue,
-        //no channel 3 is intentionnal, it doesn't support enveloppe
+        //no channel 3 is intentionnal, it doesn't support envelope
         IOAddresses.AUDIO_NR42.rawValue,
     ]
     
@@ -412,7 +409,6 @@ public struct GameBoyConstants {
         self.ROMBankSizeInBytes = ROMBankSize * 1024
         self.VBLANK_TRIGGER = ScreenHeight * MCyclesPerScanline //Vblank is triggered after all line has been rendered
         self.APUFrameSequencerStepLength =  CPUSpeed / APUFrameSequencerFrequency
-        self.EnveloppeAbsoluteSpeedDivider = APUSpeedDivider * EnveloppeRelativeSpeedDivider
     }
 }
 
@@ -549,6 +545,10 @@ public enum MMUAddressSpaces {
     static let OBJECT_ATTRIBUTE_MEMORY:ClosedRange<Short> = MMUAddresses.OBJECT_ATTRIBUTE_MEMORY.rawValue...MMUAddresses.OBJECT_ATTRIBUTE_MEMORY_END.rawValue
     static let IO_REGISTERS = MMUAddresses.IO_REGISTERS.rawValue...MMUAddresses.IO_REGISTERS_END.rawValue
     static let AUDIO_REGISTERS = IOAddresses.AUDIO_NR10.rawValue...IOAddresses.AUDIO_NR51.rawValue
+    static let AUDIO_CHANNEL1_REGISTERS = IOAddresses.AUDIO_NR10.rawValue...IOAddresses.AUDIO_NR14.rawValue
+    static let AUDIO_CHANNEL2_REGISTERS = IOAddresses.AUDIO_NR21.rawValue...IOAddresses.AUDIO_NR24.rawValue
+    static let AUDIO_CHANNEL3_REGISTERS = IOAddresses.AUDIO_NR30.rawValue...IOAddresses.AUDIO_NR34.rawValue
+    static let AUDIO_CHANNEL4_REGISTERS = IOAddresses.AUDIO_NR41.rawValue...IOAddresses.AUDIO_NR44.rawValue
     static let WAVE_RAM = MMUAddresses.WAVE_RAM.rawValue...MMUAddresses.WAVE_RAM_END.rawValue
     static let HIGH_RAM:ClosedRange<Short> = MMUAddresses.HIGH_RAM.rawValue...MMUAddresses.HIGH_RAM_END.rawValue
     static let WINDOW_TILE_MAP_AREA_0:ClosedRange<Short> = 0x9800...0x9BFF
@@ -633,10 +633,10 @@ public enum IOAddresses:Short {
 /// standard color palettes
 public enum StandardColorPalettes {
     /// Game Boy
-    static let DMG = ColorPalette([Color(0x9B, 0xBC, 0x0F),Color(0x8B, 0xAC, 0x0F),Color(0x30, 0x62, 0x30),Color(0x0F, 0x38, 0x15)])
+    public static let DMG = ColorPalette([Color(0x9B, 0xBC, 0x0F),Color(0x8B, 0xAC, 0x0F),Color(0x30, 0x62, 0x30),Color(0x0F, 0x38, 0x15)])
     
     /// Game Boy Pocket
-    static let MGB = ColorPalette([Color(0xFF, 0xFF, 0xFF),Color(0xA9, 0xA9, 0xA9),Color(0x54, 0x54, 0x54),Color(0x00, 0x00, 0x00)])
+    public static let MGB = ColorPalette([Color(0xFF, 0xFF, 0xFF),Color(0xA9, 0xA9, 0xA9),Color(0x54, 0x54, 0x54),Color(0x00, 0x00, 0x00)])
 }
 
 /// PPU Timings of each mode (in T cycles)

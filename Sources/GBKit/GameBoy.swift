@@ -59,4 +59,15 @@ public class GameBoy {
             self.motherboard.apu.configuration
         }
     }
+    
+    /// ppu configuration
+    public var ppuConfiguration:PPUConfiguration {
+        set {
+            self.motherboard.ppu.configuration = newValue
+        }
+        
+        get {
+            self.motherboard.ppu.configuration
+        }
+    }
 }

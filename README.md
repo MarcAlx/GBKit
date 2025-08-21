@@ -6,14 +6,14 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 **Status** Games that don't need MBC supports or advance CPU tricks work, e.g Tetris, Tennis...
 
-**Work in progress** (still under active development) MBC and Audio (playing but innacurate) (ETA: when its done!). For now limited to GB, GBC support planned.
+**Work in progress** (still under active development, MBC under development) (ETA: when its done!). For now limited to GB, GBC support planned.
 
 ## Miletones
 
 - (Done) CPU
 - (Done) PPU
-- (In development) APU, status: audio is produced yet innacurate (goal is to pass dmg-sound test roms)
-- (TODO) MBC handling
+- (Done, not 100% accurate) APU
+- (In development) MBC handling
 - (TODO) Finish unit tests
 - (Next) Move from `XCTest` to new Swift `Testing`
 - (Later) GBC Support
@@ -22,7 +22,7 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 ![](./doc/architecture.png)
 
-From a game rom, inputs, audio configuration and 60fps timing GBKit produces video frames and audio buffers.
+From a game rom, inputs, audio/video configurations and 60fps timing GBKit produces video frames and audio samples.
 
 ### Components dependency tree
 
@@ -32,12 +32,14 @@ graph TB;
   MB[MotherBoard]
   CPU[CPU]
   MMU[MMU]
-  APU[APU]
-  IO[I/O interface]
+  APU[APU]           
+  LCDI[LCDInterface]
+  TIMI[TimerInterface]
+  JOYI[JoyPadInterface]
+  AUDIOI[AudioInterface]
   JOY[JoyPad]
   R[Registers]
-  INT[Interrupts interface]
-  PM[Palette Manager]
+  INT[Interrupts control interface]
   TIM[Timer]
 
   GB --> MB;
@@ -49,8 +51,11 @@ graph TB;
   MB --> APU;
   MB --> TIM;
 
-  MMU --> IO;
   MMU --> INT;
+  MMU --> LCDI;
+  MMU --> JOYI;
+  MMU --> AUDIOI;
+  MMU --> TIMI;
 
   CPU --> MMU;
   CPU --> R
@@ -58,13 +63,11 @@ graph TB;
   JOY --> MMU;
   TIM --> MMU;
   APU --> MMU;
-
-  PPU --> PM;
 ```
 
 ## Timing equivalency
 
-|   Timing (s)  |   Timing (ms)  | CPU Speed (Hz/T cycle)    |   CPU Speed (Hz/M cycle)  |   Audio frequency (Hz)  |   FPS     |  Note             |
+|   Timing (s)  |   Timing (ms)  | CPU Speed (Hz/M cycle)    |   CPU Speed (Hz/T cycle)  |   Audio frequency (Hz)  |   FPS     |  Note             |
 |---------------|----------------|---------------------------|---------------------------|-------------------------|-----------|-------------------|
 |   1           |   1000         | 1 048 576                 |   4 194 304               |   44100                 |   60      |   60 fps          |
 |   0,000022    |   0,022        | ~23,75                    |   ~95                     |   1                     |   0,0013  |   Per audio frame |
@@ -79,7 +82,7 @@ _n.b 1 M cycle = 4 T cycles_
 
 #### CPU
 
-Passing : 
+Passing: 
 
  - 01-special.gb
  - 02-interrupts.gb
@@ -99,14 +102,20 @@ Passing :
   
   - [DMG Acid2](https://github.com/mattcurrie/dmg-acid2)
 
- #### APU (WIP)
+#### MMU
 
-  Passing :
-  
+  Non passing:
+  - 01-read_timing.gb
+  - 02-wrtie_timing.gb
+  - 03-modify_timing.gb
+
+  n.b requires CPU to decompose its instruction to reflect mmu state
+
+ #### APU
+
+  Non passing:
   - 01-registers.gb 
-
-  Non passing :
-  - 02-len ctr.gb 
+  - 02-len ctr.gb
   - 03-trigger.gb 
   - 04-sweep.gb 
   - 05-sweep details.gb 
@@ -178,6 +187,9 @@ This project contains some unit tests, objective is to test each core fonction o
 - [GhostBoy (c++)](https://github.com/GhostSonic21/GhostBoy)
 - [AXWGameBoy (go)](https://github.com/ArcticXWolf/AXWGameboy)
 - [Argentum (rust)](https://github.com/NightShade256/Argentum)
+- [TLMBoy (c++)](https://github.com/not-chciken/TLMBoy)
+- [ayyboy (rust)](https://github.com/ioncodes/ayyboy)
+
 
 ### Worth reading articles
 
@@ -208,6 +220,9 @@ This project contains some unit tests, objective is to test each core fonction o
 - [Gameboy sound hardware](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
 - [GBSOUND.txt](https://www.devrs.com/gb/files/hosted/GBSOUND.txt)
 - [Nitty Gritty Gameboy Cycle Timing.txt](http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt)
+- [TLMBoy: The Audio Processing Unit (APU) - Square Channel](https://www.chciken.com/tlmboy/2025/03/28/gameboy-apu-square.html)
+- [TLMBoy: The Audio Processing Unit (APU) - Noise Channel](https://www.chciken.com/tlmboy/2025/03/24/gameboy-apu-noise.html)
+
 
 ### forums / threads / questions
 
@@ -217,6 +232,7 @@ This project contains some unit tests, objective is to test each core fonction o
 - https://www.reddit.com/r/EmuDev/comments/5gkwi5/gb_apu_sound_emulation/
 - https://www.reddit.com/r/Gameboy/comments/a1c8h0/what_happens_when_a_gameboy_screen_is_disabled/
 - https://www.reddit.com/r/EmuDev/comments/5gkwi5/comment/dat3zni
+- https://www.reddit.com/r/EmuDev/comments/j4xn0s/gb_how_to_get_correct_memory_timings/
 
 - https://forums.nesdev.org/viewtopic.php?t=9088
 - https://forums.nesdev.org/viewtopic.php?t=16621

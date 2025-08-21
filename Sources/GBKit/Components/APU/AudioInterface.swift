@@ -6,42 +6,6 @@ public enum AudioChannelId:Int {
     case CH4 = 3
 }
 
-///maps each Audio channel that supports enveloppe to an int value, ease further indexing
-public enum EnveloppableAudioChannelId:Int {
-    case CH1 = 0
-    case CH2 = 1
-    case CH4 = 2
-}
-
-///maps each Audio channel that supports period
-public enum ChannelWithPeriodId:Int {
-    case CH1 = 0
-    case CH2 = 1
-    case CH3 = 2
-}
-
-///maps each Audio channel that supports duty to an int value, ease further indexing
-public enum DutyAudioChannelId:Int {
-    case CH1 = 0
-    case CH2 = 1
-}
-
-///to avoid nullable
-struct DefaultAPUProxy: APUProxy {
-    var isAPUEnabled: Bool = false
-    
-    var isCH1Enabled: Bool = false
-    
-    var isCH2Enabled: Bool = false
-    
-    var isCH3Enabled: Bool = false
-    
-    var isCH4Enabled: Bool = false
-    
-    func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value: Byte) {
-    }
-}
-
 /// acts as a proxy over apu state, distinguished from AudioInterface as it doesn't interract with registers
 public protocol APUProxy {
     ///true if APU is enabled
@@ -59,66 +23,30 @@ public protocol APUProxy {
     ///true if channel 4 is enabled
     var isCH4Enabled:Bool {get set}
     
-    /// iniits length timer for a given channel using value from an NRX1 register
-    func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte)
+    /// true if length will  ticked during next step of sequencer
+    var willTickLength:Bool {get}
+    
+    /// true if enveloppe will  ticked during next step of sequencer
+    var willTickEnvelope:Bool {get}
+    
+    /// channel 1
+    var channel1:SquareWithSweepChannel {get}
+    /// channel 2
+    var channel2:SquareChannel {get}
+    /// channel 3
+    var channel3:WaveChannel {get}
+    /// channel 4
+    var channel4:NoiseChannel {get}
+    
+    /// read NR52 value
+    func readNR52() -> Byte
+    
+    /// wrtie NR52 value
+    func writeNR52(value:Byte)
 }
 
 /// ease access to audio registers
 public protocol AudioInterface {
-    /// enable or disable audio
-    func setAudioState(_ enabled: Bool) -> Void
-    
-    /// true if audio is enabled
-    func isAudioEnabled() -> Bool
-    
-    /// return duty pattern for an audio channel
-    func getDutyPattern(_ channel:DutyAudioChannelId) -> Byte
-    
-    /// return period for an audio channel
-    func getPeriod(_ channel:ChannelWithPeriodId) -> Short
-    
-    /// write duty period for an audio channel
-    func setPeriod(_ channel:DutyAudioChannelId, _ val:Short)
-    
-    /// true if length is enabled
-    func isLengthEnabled(_ channel:AudioChannelId) -> Bool
-    
-    /// true if channel is triggered
-    func isTriggered(_ channel:AudioChannelId) -> Bool
-    
-    /// reset trigger for a channel
-    func resetTrigger(_ channel:AudioChannelId)
-    
-    ///returns enveloppe direction, 0 -> Descreasing, 1-> Increasing
-    func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte
-    
-    ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    func getEnvelopeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte
-    
-    ///returns enveloppe pace, every each enveloppe tick of this value enveloppe is applied
-    func getEnvelopeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte
-    
-    ///return sweep pace (nb of iteration before sweep is applied)
-    func getSweepPace() -> Byte
-    
-    ///return sweep direction, 0 -> Descreasing, 1-> Increasing
-    func getSweepDirection() -> Byte
-    
-    ///get sweep step
-    func getSweepStep() -> Byte
-    
-    ///returns wave output level
-    func getWaveOutputLevel() -> Byte
-    
-    ///returns noise clock shift
-    func getNoiseClockShift() -> Byte
-    
-    /// returns Linear feedback shift register width for noise channel
-    func hasNoiseShortWidth() -> Bool
-    
-    /// returns noise clock divider
-    func getNoiseClockDivisor() -> Int
-    
     /// returns information about each channel L/R audio panning, if true the corresponding channel componnent L/R is enabled (it's hard panning on/off no seamless transition here)
     func getAPUChannelPanning() -> (CH4_L:Bool,
                                     CH3_L:Bool,
@@ -137,4 +65,25 @@ public protocol AudioInterface {
     
     ///register an apu for use
     func registerAPU(apu:APUProxy)
+}
+
+
+///to avoid nullable
+struct DefaultAPUProxy: APUProxy {
+    var isAPUEnabled: Bool = false
+    var willTickLength: Bool = false
+    var willTickEnvelope: Bool = false
+    var isCH1Enabled: Bool = false
+    var isCH2Enabled: Bool = false
+    var isCH3Enabled: Bool = false
+    var isCH4Enabled: Bool = false
+    var channel1:SquareWithSweepChannel = Sweep()
+    var channel2:SquareChannel = Pulse()
+    var channel3:WaveChannel = Wave()
+    var channel4:NoiseChannel = Noise()
+    func readNR52() -> Byte {
+        return 0xFF
+    }
+    func writeNR52(value:Byte) {
+    }
 }

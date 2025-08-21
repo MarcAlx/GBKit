@@ -1,13 +1,16 @@
 /// common properties of an APU channel
-public protocol APUChannel: Component, Clockable {    
+public protocol APUChannel: Component, Clockable, MMUInterface {
+    ///  channel id
+    var id: AudioChannelId { get }
+    
     /// can be seen as channel value
     var amplitude:Byte { get }
     
+    /// amplitude once processed by DAC
+    var analogAmplitude:Float { get }
+    
     /// true if enabled
     var enabled:Bool { get set }
-    
-    ///channel id
-    var id:AudioChannelId { get }
     
     /// causes this channel to trigger
     func trigger()
@@ -15,9 +18,6 @@ public protocol APUChannel: Component, Clockable {
 
 /// channel that supports length control
 public protocol LengthableChannel {
-    /// timer for length
-    var lengthTimer:Int {get}
-    
     /// tick length
     func tickLength()
 }
@@ -35,33 +35,35 @@ public protocol VolumableChannel {
 
 /// channel that supports period
 public protocol PeriodicChannel {
-    ///channel id
-    var periodId:ChannelWithPeriodId { get }
 }
 
-/// channel that supports enveloppe control
+/// channel that supports envelope control
 public protocol EnvelopableChannel {
-    ///channel id
-    var envelopeId:EnveloppableAudioChannelId { get }
-    
     /// tick volume
-    func tickEnveloppe()
+    func tickEnvelope()
 }
 
-/// square1 channel support length and enveloppe control
-public protocol SquareChannel: APUChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel {
-    ///square id
-    var squareId:DutyAudioChannelId { get }
+/// an audio channel is clockable component with length, since all channel have Length cover it in protocol class
+public protocol CoreAudioChannel: Component,
+                                  APUChannel,
+                                  Clockable,
+                                  LengthableChannel{
+    ///register an APU for further usage
+    func registerAPU(apu: APUProxy)
 }
 
-/// square2 channel  support length and enveloppe control along with sweep control
-public protocol SquareWithSweepChannel: APUChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel, SweepableChannel {
+/// square1 channel support length and envelope control
+public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel {
+}
+
+/// square2 channel  support length and envelope control along with sweep control
+public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel, SweepableChannel {
 }
 
 /// wave channel supports length and volume control
-public protocol WaveChannel: APUChannel, PeriodicChannel, LengthableChannel, VolumableChannel {
+public protocol WaveChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, VolumableChannel {
 }
 
-/// noise channel supports length and enveloppe control
-public protocol NoiseChannel: APUChannel, LengthableChannel, EnvelopableChannel {
+/// noise channel supports length and envelope control
+public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnvelopableChannel {
 }

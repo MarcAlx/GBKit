@@ -7,6 +7,55 @@ public enum LCDStatMode: UInt8 {
     case PIXEL_TRANSFER = 0b0000_0011
 }
 
+// Configuration to provide to PPU
+public struct PPUConfiguration {
+    private var _palette:ColorPalette = StandardColorPalettes.DMG
+    
+    ///palette used to render color to framebuffer
+    public var palette:ColorPalette {
+        get {
+            self._palette
+        }
+        set {
+            self._palette = newValue
+            self.emptyFrameBuffer = PPUConfiguration.buildEmptyFrameBuffer(fromPalette: newValue)
+        }
+    }
+    
+    /// if true BG will be displayed (if enabled by game too)
+    public var isBGEnabled:Bool
+    
+    /// if true WIN will be displayed (if enabled by game too)
+    public var isWINEnabled:Bool
+    
+    /// if true OBJ will be displayed (if enabled by game too)
+    public var isOBJEnabled:Bool
+    
+    /// empty frame buffer, precomputed to avoid useless computation
+    public private(set) var emptyFrameBuffer:Data
+    
+    ///default configuration, mainly for init purpose
+    public static let DEFAULT:PPUConfiguration = PPUConfiguration(
+        _palette: StandardColorPalettes.DMG,
+        isBGEnabled: true,
+        isWINEnabled: true,
+        isOBJEnabled: true,
+        emptyFrameBuffer: buildEmptyFrameBuffer(fromPalette: StandardColorPalettes.DMG)
+    )
+    
+    /// returns an empty frame buffer for current palette
+    private static func buildEmptyFrameBuffer(fromPalette:ColorPalette) -> Data {
+        return Data(stride(from: 0, to: GBConstants.PixelCount, by: 1).flatMap {
+            _ in return [
+                fromPalette[0].r,
+                fromPalette[0].g,
+                fromPalette[0].b,
+                255
+            ]//R,G,B,A
+        })
+    }
+}
+
 /// Pixel Processing Unit
 public class PPU: Component, Clockable {
     /// white frame, for init and debug purpose
@@ -15,7 +64,8 @@ public class PPU: Component, Clockable {
     private let mmu:MMU
     private let ios:LCDInterface
     private let interrupts:InterruptsControlInterface
-    private let pManager:PaletteManager
+    
+    public var configuration:PPUConfiguration
     
     public private(set) var cycles:Int = 0
     
@@ -34,11 +84,11 @@ public class PPU: Component, Clockable {
     //stores bg and win color indexes to ease obj priority application
     private var bgWinColorIndexes:[[Int]] = []
     
-    init(mmu:MMU, pm:PaletteManager) {
+    init(mmu:MMU) {
         self.mmu = mmu
         self.ios = mmu
         self.interrupts = mmu
-        self.pManager = pm
+        self.configuration = PPUConfiguration.DEFAULT
         self.prepareNextFrame()
     }
     
@@ -47,7 +97,8 @@ public class PPU: Component, Clockable {
         self.frameSync = 0
         self.lineSync = 0
         self.windowLineCounter = 0
-        self._frameBuffer = pManager.currentEmptyFrame
+        self._frameBuffer = self.configuration.emptyFrameBuffer
+        ios.writeLCDStatMode(.HBLANK)
     }
     
     public func flush(){
@@ -182,7 +233,7 @@ public class PPU: Component, Clockable {
             //viewport y
             let vpy:Byte = (ly &+ scy) //avoid overflow and ensure horizontal wrap arround (all bg not only screen)
             //palette for bg and win
-            let bgWinPalette = ColorPalette(paletteData: ios.LCD_BGP, reference: pManager.currentPalette)
+            let bgWinPalette = ColorPalette(paletteData: ios.LCD_BGP, reference: self.configuration.palette)
             
             //draw BG / WIN
             
@@ -252,12 +303,16 @@ public class PPU: Component, Clockable {
                 
                 //decode color using the two bytes (b1, b2) of the tile line that contains the pixel to draw (at)
                 let (colorIndex, effectiveColor) = self.decodeColor(palette: bgWinPalette,
-                                                      b1: self.mmu.read(address: lineAddr),
-                                                      b2: self.mmu.read(address: lineAddr+1),
-                                                      at: IntToByteMask[Int(tileBit)])
+                                                                    b1: self.mmu.read(address: lineAddr),
+                                                                    b2: self.mmu.read(address: lineAddr+1),
+                                                                    at: IntToByteMask[Int(tileBit)])
                 
-                //draw pixel
-                self.drawPixelAt(x: destx, y: desty, withColor: effectiveColor)
+                //check config before drawing
+                if((self.configuration.isBGEnabled  && !lineHasWindow)
+                || (self.configuration.isWINEnabled &&  lineHasWindow)) {
+                    //draw pixel
+                    self.drawPixelAt(x: destx, y: desty, withColor: effectiveColor)
+                }
                 
                 //store pixel type
                 self.bgWinColorIndexes[Int(destx)][Int(desty)] = colorIndex
@@ -273,7 +328,7 @@ public class PPU: Component, Clockable {
         }
         
         //OBJ are enabled
-        if(ios.readLCDControlFlag(.OBJ_ENABLE)) {
+        if(self.configuration.isOBJEnabled && ios.readLCDControlFlag(.OBJ_ENABLE)) {
             //read obj size to determine tile size (based on lcdc)
             let useLargeTile = ios.readLCDControlFlag(.OBJ_SIZE)
             //identify obj tile height
@@ -288,7 +343,7 @@ public class PPU: Component, Clockable {
             for tile in tiles {
                 //obj palette considering obj palette flag
                 let objPalette = ColorPalette(paletteData: tile.useObjPalette1 ? obp1 : obp0,
-                                              reference: pManager.currentPalette)
+                                              reference: self.configuration.palette)
                 
                 //tile line considering y flip flag
                 let tileLine = Byte(tile.isYFlipped ? Int(th) - (Int(ly) - tile.viewportYPos) - 1
@@ -427,7 +482,7 @@ public class PPU: Component, Clockable {
         self.windowLineCounter = 0
         
         //needed to avoid pixel persistance accross frame generation, fill frame background with color 0
-        let bgWinPalette = ColorPalette(paletteData: ios.LCD_BGP, reference: pManager.currentPalette)
+        let bgWinPalette = ColorPalette(paletteData: ios.LCD_BGP, reference: self.configuration.palette)
         self.nextFrame = Data(stride(from: 0, to: GBConstants.PixelCount, by: 1).flatMap {
             _ in return [bgWinPalette[0].r,bgWinPalette[0].g,bgWinPalette[0].b,255]//R,G,B,A
         })
