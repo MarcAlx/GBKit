@@ -43,31 +43,30 @@ public struct APUConfiguration {
 }
 
 public class APU: Component, Clockable, APUProxy {
-    //true if enabled
+    /// true if enabled
     private var enabled = false
-    
-    ///buffer filled with 0.0 to express silence
+    /// buffer filled with 0.0 to express silence
     public private(set) var SILENT_BUFFER:[AudioSample] = []
     
     public private(set) var cycles:Int = 0
-    
     private let mmu:MMU
     
+    /// counter for frame sequencer
     private var frameSequencerCounter:Int = 0
-    
+    /// current step of frame sequencer
     private var frameSequencerStep:Int = 0
     
+    /// capacitor for L high pass filter
     private var hpfCapacitorL: Float = 0.0
+    /// capacitor for R high pass filter
     private var hpfCapacitorR: Float = 0.0
+    /// charge factor for high pass filter
     private var hpfChargeFactor: Float = 0.0
     
-    private var channel1:SquareWithSweepChannel
-    private var channel2:SquareChannel
-    private var channel3:WaveChannel
-    private var channel4:NoiseChannel
-    
-    //shorthand
-    private var channels:[CoreAudioChannel] = []
+    public var channel1:SquareWithSweepChannel
+    public var channel2:SquareChannel
+    public var channel3:WaveChannel
+    public var channel4:NoiseChannel
     
     //rate (in M tick) at which we sample
     private var sampleTickRate:Int = 0
@@ -108,23 +107,59 @@ public class APU: Component, Clockable, APUProxy {
     
     public var willTickLength:Bool {
         get {
-               self.frameSequencerStep == 0
-            || self.frameSequencerStep == 2
-            || self.frameSequencerStep == 4
-            || self.frameSequencerStep == 6
+            let nextStep = self.frameSequencerStep + 1
+            return nextStep == 0
+                || nextStep == 2
+                || nextStep == 4
+                || nextStep == 6
         }
+    }
+    
+    public var willTickEnvelope:Bool {
+        get {
+            self.frameSequencerStep + 1 == 7
+        }
+    }
+
+    
+    public func readNR52() -> Byte {
+        return (self.enabled ? 0b1000_0000 : 0) //only bit 7 is writable
+             | 0b0111_0000 //bits 6 5 4 are always 1 on read
+             //bits 3 2 1 0 depends on channel state
+             | (self.isCH4Enabled ? 0b0000_1000 : 0)
+             | (self.isCH3Enabled ? 0b0000_0100 : 0)
+             | (self.isCH2Enabled ? 0b0000_0010 : 0)
+             | (self.isCH1Enabled ? 0b0000_0001 : 0);
+    }
+    
+    public func writeNR52(value:Byte) {
+        let willEnable = isBitSet(ByteMask.Bit_7, value)
+        //apu is enabled and will disable
+        if(self.isAPUEnabled && !willEnable) {
+            //turn off all channel
+            self.isCH1Enabled = false;
+            self.isCH2Enabled = false;
+            self.isCH3Enabled = false;
+            self.isCH4Enabled = false;
+            //disabling should clear all audio registers except NR52
+            for addr in MMUAddressSpaces.AUDIO_REGISTERS {
+                self.mmu[addr] = 0
+            }
+        }
+        //apu is disabled and will enabled
+        else if(!self.isAPUEnabled && willEnable) {
+            //this doesn't enable all channel, it's up to developper to re-enable each
+        }
+        //notify enable
+        self.isAPUEnabled = willEnable
     }
     
     init(mmu:MMU) {
         self.mmu = mmu
-        self.channel1 = Sweep(mmu: self.mmu)
-        self.channel2 = Pulse(mmu: self.mmu)
-        self.channel3 = Wave (mmu: self.mmu)
-        self.channel4 = Noise(mmu: self.mmu)
-        self.channels = [self.channel1,
-                         self.channel2,
-                         self.channel3,
-                         self.channel4]
+        self.channel1 = Sweep()
+        self.channel2 = Pulse()
+        self.channel3 = Wave()
+        self.channel4 = Noise()
         
         //ensure configuration related properties are set on init
         self.configuration = APUConfiguration.DEFAULT
@@ -135,15 +170,6 @@ public class APU: Component, Clockable, APUProxy {
         self.channel2.registerAPU(apu: self)
         self.channel3.registerAPU(apu: self)
         self.channel4.registerAPU(apu: self)
-    }
-    
-    /// initis length timer for a given channel using value from an NRX1 register
-    public func initLengthTimer(_ channel: AudioChannelId, _ nrx1Value:Byte){
-        //get channel index
-        let chIdx:Int = channel.rawValue;
-        //timer is set to Default values minus masked part of nrx1 value
-        self.channels[chIdx].lengthTimer = GBConstants.DefaultLengthTimer[chIdx]
-                                         - Int((nrx1Value & GBConstants.NRX1_lengthMask[chIdx]))
     }
     
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
@@ -304,14 +330,8 @@ public class APU: Component, Clockable, APUProxy {
         self.channel2.reset()
         self.channel3.reset()
         self.channel4.reset()
-        
-        //ensure channels state matches mmu state
-        let nr52 = self.mmu[IOAddresses.AUDIO_NR52.rawValue]
-        self.enabled = isBitSet(ByteMask.Bit_7, nr52)
-        self.channel4.enabled = isBitSet(ByteMask.Bit_3, nr52)
-        self.channel3.enabled = isBitSet(ByteMask.Bit_2, nr52)
-        self.channel2.enabled = isBitSet(ByteMask.Bit_1, nr52)
-        self.channel1.enabled = isBitSet(ByteMask.Bit_0, nr52)
+        //clear APU registers
+        self.writeNR52(value: 0)
     }
     
     /// apply HPF to input sample

@@ -6,14 +6,14 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 **Status** Games that don't need MBC supports or advance CPU tricks work, e.g Tetris, Tennis...
 
-**Work in progress** (still under active development) MBC and Audio (playing but innacurate) (ETA: when its done!). For now limited to GB, GBC support planned.
+**Work in progress** (still under active development, MBC under development) (ETA: when its done!). For now limited to GB, GBC support planned.
 
 ## Miletones
 
 - (Done) CPU
 - (Done) PPU
-- (In development) APU, status: audio is produced yet innacurate
-- (TODO) MBC handling
+- (Done, not 100% accurate) APU
+- (In development) MBC handling
 - (TODO) Finish unit tests
 - (Next) Move from `XCTest` to new Swift `Testing`
 - (Later) GBC Support
@@ -67,7 +67,7 @@ graph TB;
 
 ## Timing equivalency
 
-|   Timing (s)  |   Timing (ms)  | CPU Speed (Hz/T cycle)    |   CPU Speed (Hz/M cycle)  |   Audio frequency (Hz)  |   FPS     |  Note             |
+|   Timing (s)  |   Timing (ms)  | CPU Speed (Hz/M cycle)    |   CPU Speed (Hz/T cycle)  |   Audio frequency (Hz)  |   FPS     |  Note             |
 |---------------|----------------|---------------------------|---------------------------|-------------------------|-----------|-------------------|
 |   1           |   1000         | 1 048 576                 |   4 194 304               |   44100                 |   60      |   60 fps          |
 |   0,000022    |   0,022        | ~23,75                    |   ~95                     |   1                     |   0,0013  |   Per audio frame |
@@ -113,12 +113,8 @@ Passing:
 
  #### APU
 
-  Passing :
-  
-  - 01-registers.gb 
-
   Non passing:
-
+  - 01-registers.gb 
   - 02-len ctr.gb
   - 03-trigger.gb 
   - 04-sweep.gb 

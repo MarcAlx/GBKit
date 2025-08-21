@@ -1,5 +1,8 @@
 /// common properties of an APU channel
-public protocol APUChannel: Component, Clockable {    
+public protocol APUChannel: Component, Clockable, MMUInterface {
+    ///  channel id
+    var id: AudioChannelId { get }
+    
     /// can be seen as channel value
     var amplitude:Byte { get }
     
@@ -9,18 +12,12 @@ public protocol APUChannel: Component, Clockable {
     /// true if enabled
     var enabled:Bool { get set }
     
-    ///channel id
-    var id:AudioChannelId { get }
-    
     /// causes this channel to trigger
     func trigger()
 }
 
 /// channel that supports length control
 public protocol LengthableChannel {
-    /// timer for length
-    var lengthTimer:Int {get set}
-    
     /// tick length
     func tickLength()
 }
@@ -38,15 +35,10 @@ public protocol VolumableChannel {
 
 /// channel that supports period
 public protocol PeriodicChannel {
-    ///channel id
-    var periodId:ChannelWithPeriodId { get }
 }
 
 /// channel that supports envelope control
-public protocol EnveloppableChannel {
-    ///channel id
-    var envelopeId:EnveloppableAudioChannelId { get }
-    
+public protocol EnvelopableChannel {
     /// tick volume
     func tickEnvelope()
 }
@@ -61,13 +53,11 @@ public protocol CoreAudioChannel: Component,
 }
 
 /// square1 channel support length and envelope control
-public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnveloppableChannel {
-    ///square id
-    var squareId:DutyAudioChannelId { get }
+public protocol SquareChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel {
 }
 
 /// square2 channel  support length and envelope control along with sweep control
-public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnveloppableChannel, SweepableChannel {
+public protocol SquareWithSweepChannel: CoreAudioChannel, PeriodicChannel, LengthableChannel, EnvelopableChannel, SweepableChannel {
 }
 
 /// wave channel supports length and volume control
@@ -75,5 +65,5 @@ public protocol WaveChannel: CoreAudioChannel, PeriodicChannel, LengthableChanne
 }
 
 /// noise channel supports length and envelope control
-public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnveloppableChannel {
+public protocol NoiseChannel: CoreAudioChannel, LengthableChannel, EnvelopableChannel {
 }

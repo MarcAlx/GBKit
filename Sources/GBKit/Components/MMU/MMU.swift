@@ -3,9 +3,9 @@
  */
 public class MMU: MMUCore, InterruptsControlInterface,
                            LCDInterface,
+                           AudioInterface,
                            TimerInterface,
-                           JoyPadInterface,
-                           AudioInterface {
+                           JoyPadInterface {
     
     private var masterEnable:Bool = true
     
@@ -267,92 +267,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
     }
     
     // mark: AudioInterface
-    
-    public func setAudioState(_ enabled: Bool) {
-        let state = enabled ? self[IOAddresses.AUDIO_NR52.rawValue] | ByteMask.Bit_7.rawValue
-                            : self[IOAddresses.AUDIO_NR52.rawValue] & NegativeByteMask.Bit_7.rawValue
-        self.write(address: IOAddresses.AUDIO_NR52.rawValue, val: state)
-    }
 
-    public func isAudioEnabled() -> Bool {
-        return isBitSet(ByteMask.Bit_7, self[IOAddresses.AUDIO_NR52.rawValue])
-    }
-    
-    public func getDutyPattern(_ channel:DutyAudioChannelId) -> Byte {
-        //only upper 2 bits of NR{1|2}1 (then shifted get value 0, 1, 2, 3)
-        return (self.directRead(address: GBConstants.WaveDutyRegisters[channel.rawValue]) & 0b1100_0000) >> 6
-    }
-    
-    public func getPeriod(_ channel:ChannelWithPeriodId) -> Short {
-        //extract 16bits starting from NR{1|2|3}3 (thus overlaping NR{1|2|3}4)
-        let val:Short = self.directRead(address: GBConstants.PeriodRegisters[channel.rawValue])
-        //keep 3bits of NR{1|2|3}4 and 8bits of NR{1|2|3}3
-        return val & 0b00000111_11111111
-    }
-    
-    public func setPeriod(_ channel: DutyAudioChannelId, _ val:Short) {
-        self.write(address: GBConstants.PeriodRegisters[channel.rawValue], val: val)
-    }
-    
-    public func isLengthEnabled(_ channel:AudioChannelId) -> Bool {
-        return isBitSet(ByteMask.Bit_6, self.directRead(address: GBConstants.AudioChannelControlRegisters[channel.rawValue]))
-    }
-    
-    public func isTriggered(_ channel:AudioChannelId) -> Bool {
-       return isBitSet(ByteMask.Bit_7, self.directRead(address: GBConstants.AudioChannelControlRegisters[channel.rawValue]))
-    }
-    
-    public func resetTrigger(_ channel:AudioChannelId) {
-        let addr:Short = GBConstants.AudioChannelControlRegisters[channel.rawValue]
-        //clear trigger bit
-        self[addr] = self.directRead(address: addr) & NegativeByteMask.Bit_7.rawValue
-    }
-    
-    ///returns envelope direction, 0 -> Descreasing, 1-> Increasing
-    public func getEnvelopeDirection(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_1000) >> 3;
-    }
-    
-    ///returns envelope pace, every each envelope tick of this value envelope is applied
-    public func getEnvelopeSweepPace(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b0000_0111;
-    }
-    
-    ///returns envelope pace, every each envelope tick of this value envelope is applied
-    public func getEnvelopeInitialVolume(_ channel:EnveloppableAudioChannelId) -> Byte {
-        return (self.directRead(address: GBConstants.EnvelopeControlRegisters[channel.rawValue]) & 0b1111_0000) >> 4;
-    }
-    
-    public func getSweepPace() -> Byte {
-        return (self[IOAddresses.AUDIO_NR10.rawValue] & 0b0111_0000) >> 4
-    }
-    
-    public func getSweepDirection() -> Byte {
-        return (self[IOAddresses.AUDIO_NR10.rawValue] & 0b0000_1000) >> 3
-    }
-    
-    public func getSweepStep() -> Byte {
-        return (self[IOAddresses.AUDIO_NR10.rawValue] & 0b0000_0111)
-    }
-    
-    public func getWaveOutputLevel() -> Byte {
-        return (self[IOAddresses.AUDIO_NR32.rawValue] & 0b0110_0000) >> 5
-    }
-    
-    public func getNoiseClockShift() -> Byte {
-        return (self[IOAddresses.AUDIO_NR43.rawValue] & 0b1111_0000) >> 4
-    }
-    
-    public func hasNoiseShortWidth() -> Bool {
-        //if bit 3 of NR43 is set then noise has short width
-        return ((self[IOAddresses.AUDIO_NR43.rawValue] & 0b0000_1000) >> 3) > 0
-    }
-    
-    public func getNoiseClockDivisor() -> Int {
-        let divisorCode:Int = (Int(self[IOAddresses.AUDIO_NR43.rawValue]) & 0b0000_0111)
-        return GBConstants.APUNoiseDivisor[divisorCode]
-    }
-    
     public func getAPUChannelPanning() -> (CH4_L:Bool,
                                            CH3_L:Bool,
                                            CH2_L:Bool,

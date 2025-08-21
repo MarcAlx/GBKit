@@ -92,39 +92,28 @@ public class MMUCore:Component, Clockable {
             //mirror C000-DDFF (which is 0x2000 behind)
             case MMUAddressSpaces.ECHO_RAM:
                 return self.ram[address-0x2000]
-            case IOAddresses.AUDIO_NR10.rawValue:
-                return self.ram[address] | 0b1000_0000; //bit 7 is not readable
-            case IOAddresses.AUDIO_NR11.rawValue,
-                 IOAddresses.AUDIO_NR21.rawValue:
-                return self.ram[address] | 0b0011_1111; //only bits 7 6 are readable
-            case IOAddresses.AUDIO_NR13.rawValue,
-                 IOAddresses.AUDIO_NR23.rawValue,
-                 IOAddresses.AUDIO_NR31.rawValue,
-                 IOAddresses.AUDIO_NR33.rawValue,
-                 IOAddresses.AUDIO_NR41.rawValue:
-                return 0xFF //write-only
+                //Audio CH1
+            case MMUAddressSpaces.AUDIO_CHANNEL1_REGISTERS:
+                return self.apuProxy.channel1.read(address: address);
+                //Audio CH2
+            case MMUAddressSpaces.AUDIO_CHANNEL2_REGISTERS:
+                return self.apuProxy.channel2.read(address: address);
+                //Audio CH3
+            case MMUAddressSpaces.AUDIO_CHANNEL3_REGISTERS:
+                return self.apuProxy.channel3.read(address: address);
+            //Audio CH4
+            case MMUAddressSpaces.AUDIO_CHANNEL4_REGISTERS:
+                return self.apuProxy.channel4.read(address: address);
+            //WAVE Ram
+            case MMUAddressSpaces.WAVE_RAM:
+                return self.apuProxy.channel3.read(address: address);
+            //NR52
+            case (IOAddresses.AUDIO_NR52.rawValue+1)...IOAddresses.AUDIO_WAVE_PATTERN_RAM.rawValue-1: /*unused after all NRXX to start of wave ram*/
+                return 0xFF //doesn't exists so return 0xFF
             case 0xFF15 /*non exitsting NR15*/,
                  0xFF1F /*non exitsting NR35*/,
                  0xFF27...IOAddresses.AUDIO_WAVE_PATTERN_RAM.rawValue-1: /*unused after all NRXX to start of wave ram*/
                 return 0xFF //doesn't exists so return 0xFF
-            case IOAddresses.AUDIO_NR30.rawValue:
-                return self.ram[address] | 0b0111_1111; //only bit 7 is readable
-            case IOAddresses.AUDIO_NR32.rawValue:
-                return self.ram[address] | 0b1001_1111; //only bits 6 5 are readable
-            case IOAddresses.AUDIO_NR52.rawValue:
-                return self.ram[address]
-                     & 0b1000_0000 //only bit 7 is writable
-                     | 0b0111_0000 //bits 6 5 4 are always 1 on read
-                     //bits 3 2 1 0 depends on channel state
-                     | (self.apuProxy.isCH4Enabled ? 0b0000_1000 : 0)
-                     | (self.apuProxy.isCH3Enabled ? 0b0000_0100 : 0)
-                     | (self.apuProxy.isCH2Enabled ? 0b0000_0010 : 0)
-                     | (self.apuProxy.isCH1Enabled ? 0b0000_0001 : 0);
-            case IOAddresses.AUDIO_NR14.rawValue,
-                 IOAddresses.AUDIO_NR24.rawValue,
-                 IOAddresses.AUDIO_NR34.rawValue,
-                 IOAddresses.AUDIO_NR44.rawValue:
-                return self.ram[address] | 0b1011_1111; //only bit 6 is readable
             //set ram value
             default:
                 return self.ram[address]
@@ -140,12 +129,6 @@ public class MMUCore:Component, Clockable {
             //prevent writes to audio registers if APU is disabled
             if(!self.apuProxy.isAPUEnabled
             && MMUAddressSpaces.AUDIO_REGISTERS.contains(address)) {
-                return
-            }
-            
-            //if CH3 is active reading wave ram write is not allowed
-            if(self.apuProxy.isCH3Enabled
-            && MMUAddressSpaces.WAVE_RAM.contains(address)) {
                 return
             }
             
@@ -189,56 +172,29 @@ public class MMUCore:Component, Clockable {
                 self.onLYCSet(newValue)
                 self.ram[address] = newValue
                 break
-            //updating NR11 must init length timer for channel 1
-            case IOAddresses.AUDIO_NR11.rawValue:
-                self.apuProxy.initLengthTimer(AudioChannelId.CH1, newValue)
-                self.ram[address] = newValue
-                break
-            //updating NR21 must init length timer for channel 2
-            case IOAddresses.AUDIO_NR21.rawValue:
-                self.apuProxy.initLengthTimer(AudioChannelId.CH2, newValue)
-                self.ram[address] = newValue
-                break
-            //ensure setting NR30 bit 7 update CH3 enabled state
-            case IOAddresses.AUDIO_NR30.rawValue:
-                self.apuProxy.isCH3Enabled = isBitSet(.Bit_7, newValue)
-                self.ram[address] = newValue
-                break
-                //updating NR31 must init length timer for channel 3
-            case IOAddresses.AUDIO_NR31.rawValue:
-                self.apuProxy.initLengthTimer(AudioChannelId.CH3, newValue)
-                self.ram[address] = newValue
-                break
-            //updating NR41 must init length timer for channel 4
-            case IOAddresses.AUDIO_NR41.rawValue:
-                self.apuProxy.initLengthTimer(AudioChannelId.CH4, newValue)
-                self.ram[address] = newValue
-                break
+            //Audio CH1
+            case MMUAddressSpaces.AUDIO_CHANNEL1_REGISTERS:
+                self.apuProxy.channel1.write(address: address, value: newValue);
+                break;
+            //Audio CH2
+            case MMUAddressSpaces.AUDIO_CHANNEL2_REGISTERS:
+                self.apuProxy.channel2.write(address: address, value: newValue);
+                break;
+            //Audio CH3
+            case MMUAddressSpaces.AUDIO_CHANNEL3_REGISTERS:
+                self.apuProxy.channel3.write(address: address, value: newValue);
+                break;
+            //Audio CH4
+            case MMUAddressSpaces.AUDIO_CHANNEL4_REGISTERS:
+                self.apuProxy.channel4.write(address: address, value: newValue);
+                break;
+            //Wave ram
+            case MMUAddressSpaces.WAVE_RAM:
+                self.apuProxy.channel3.write(address: address, value: newValue);
+                break;
             //only bit 7 of NR52 is R/W
             case IOAddresses.AUDIO_NR52.rawValue:
-                let bit7Val = newValue & ByteMask.Bit_7.rawValue
-                self.ram[address] = self.ram[address] & NegativeByteMask.Bit_7.rawValue // clear actual bit 7
-                                  | bit7Val                                             // keep only bit 7 of new value
-                let willEnable = bit7Val > 0
-                
-                //apu is enabled and will disable
-                if(self.apuProxy.isAPUEnabled && !willEnable) {
-                    //turn off all channel
-                    self.apuProxy.isCH1Enabled = false;
-                    self.apuProxy.isCH2Enabled = false;
-                    self.apuProxy.isCH3Enabled = false;
-                    self.apuProxy.isCH4Enabled = false;
-                    //disabling should clear all audio registers except NR52
-                    for addr in MMUAddressSpaces.AUDIO_REGISTERS {
-                        self.ram[addr] = 0
-                    }
-                }
-                //apu is disabled and will enabled
-                else if(!self.apuProxy.isAPUEnabled && willEnable) {
-                    //this doesn't enable all channel, it's up to developper to re-enable each
-                }
-                //notify enable
-                self.apuProxy.isAPUEnabled = willEnable
+                self.apuProxy.writeNR52(value: newValue)
                 break
             //default to ram
             default:

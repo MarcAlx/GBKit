@@ -545,6 +545,10 @@ public enum MMUAddressSpaces {
     static let OBJECT_ATTRIBUTE_MEMORY:ClosedRange<Short> = MMUAddresses.OBJECT_ATTRIBUTE_MEMORY.rawValue...MMUAddresses.OBJECT_ATTRIBUTE_MEMORY_END.rawValue
     static let IO_REGISTERS = MMUAddresses.IO_REGISTERS.rawValue...MMUAddresses.IO_REGISTERS_END.rawValue
     static let AUDIO_REGISTERS = IOAddresses.AUDIO_NR10.rawValue...IOAddresses.AUDIO_NR51.rawValue
+    static let AUDIO_CHANNEL1_REGISTERS = IOAddresses.AUDIO_NR10.rawValue...IOAddresses.AUDIO_NR14.rawValue
+    static let AUDIO_CHANNEL2_REGISTERS = IOAddresses.AUDIO_NR21.rawValue...IOAddresses.AUDIO_NR24.rawValue
+    static let AUDIO_CHANNEL3_REGISTERS = IOAddresses.AUDIO_NR30.rawValue...IOAddresses.AUDIO_NR34.rawValue
+    static let AUDIO_CHANNEL4_REGISTERS = IOAddresses.AUDIO_NR41.rawValue...IOAddresses.AUDIO_NR44.rawValue
     static let WAVE_RAM = MMUAddresses.WAVE_RAM.rawValue...MMUAddresses.WAVE_RAM_END.rawValue
     static let HIGH_RAM:ClosedRange<Short> = MMUAddresses.HIGH_RAM.rawValue...MMUAddresses.HIGH_RAM_END.rawValue
     static let WINDOW_TILE_MAP_AREA_0:ClosedRange<Short> = 0x9800...0x9BFF
