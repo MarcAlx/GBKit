@@ -233,6 +233,7 @@ This project contains some unit tests, objective is to test each core fonction o
 - https://www.reddit.com/r/Gameboy/comments/a1c8h0/what_happens_when_a_gameboy_screen_is_disabled/
 - https://www.reddit.com/r/EmuDev/comments/5gkwi5/comment/dat3zni
 - https://www.reddit.com/r/EmuDev/comments/j4xn0s/gb_how_to_get_correct_memory_timings/
+- https://www.reddit.com/r/EmuDev/comments/1mx2k5e/audio_emulation_101_game_boy_example/
 
 - https://forums.nesdev.org/viewtopic.php?t=9088
 - https://forums.nesdev.org/viewtopic.php?t=16621
