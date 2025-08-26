@@ -204,40 +204,23 @@ public class CPUCore: Component {
     
     /// returns true if intruction executed now will introduce a cycle overhead
     internal func willCycleOverhead(_ intruction:Instruction) -> Bool{
-        //C
-        if(intruction.opCode == 0x38
-        || intruction.opCode == 0xD8
-        || intruction.opCode == 0xDA
-        || intruction.opCode == 0xDC)
-        {
+        switch(intruction.opCode){
+        //C flag instructions
+        case 0x38, 0xD8, 0xDA, 0xDC:
             return self.registers.isFlagSet(.CARRY)
-        }
-        //Z
-        else if(intruction.opCode == 0x28
-             || intruction.opCode == 0xC8
-             || intruction.opCode == 0xCA
-             || intruction.opCode == 0xCC)
-        {
+        //Z flag instructions
+        case 0x28, 0xC8, 0xCA, 0xCC:
             return self.registers.isFlagSet(.ZERO)
-        }
-        //NC
-        else if(intruction.opCode == 0x30
-             || intruction.opCode == 0xD0
-             || intruction.opCode == 0xD2
-             || intruction.opCode == 0xD4)
-        {
+        //NC flag instructions
+        case 0x30, 0xD0, 0xD2, 0xD4:
             return !self.registers.isFlagSet(.CARRY)
-        }
-        //NZ
-        else if(intruction.opCode == 0x20
-             || intruction.opCode == 0xC0
-             || intruction.opCode == 0xC2
-             || intruction.opCode == 0xC4)
-        {
+        //NZ flag instructions
+        case 0x20, 0xC0, 0xC2, 0xC4:
             return !self.registers.isFlagSet(.ZERO)
-        }
         // other function has no overhead
-        return false
+        default:
+            return false;
+        }
     }
     
     /// jump to address, any provided flag is checked in order to conditionnaly jump, if inverseFlag is true flag are checked at inverse
