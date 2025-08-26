@@ -60,7 +60,7 @@ public class Motherboard: Clockable {
         if(self.isOn && self.hasCartridgeInserted) {
             var tmpCycles = 0
             while(tmpCycles < GBConstants.MCyclesPerFrame){
-                self.cpu.handleInterrupts()
+                self.cpu.tryHandleInterrupts()
                 self.cpu.tick(self.cycles, tmpCycles)
                 self.timer.tick(self.cycles, tmpCycles)
                 self.mmu.tick(self.cycles, tmpCycles)
