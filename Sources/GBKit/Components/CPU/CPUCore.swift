@@ -57,6 +57,11 @@ public class CPUCore: Component {
         //let's assume it's a call (24 cycles) without having to fetch opcode (4 cycles) so 24-4=20
     }
     
+    /// true if any interrupt is pending
+    internal var hasAnyInterruptPending:Bool {
+        self.interrupts.IE > 0 && self.interrupts.IF > 0
+    }
+    
     /// add val to HL, assign flag and return val
     internal func add_hl(_ val:Short) -> Void {
         let old:Short = val
