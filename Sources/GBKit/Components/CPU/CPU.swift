@@ -20,6 +20,9 @@ public class CPU: CPUImplementation, Clockable {
     var standardInstructionSet:[Instruction] = []
     var extendedInstructionSet:[Instruction] = []
     
+    // instruction to be executed
+    private var nextInstruction:Instruction?
+    
     public override init(mmu: MMU) {
         super.init(mmu: mmu)
         self.standardInstructionSet = self.asStandardInstructions()
@@ -28,23 +31,34 @@ public class CPU: CPUImplementation, Clockable {
     
     public func tick(_ masterCycles:Int, _ frameCycles:Int) {
         //as cycles are incremented during execute, keep up with motherboard before doing the next instruction
-        if(self.cycles > masterCycles) {
-            return
-        }
-        
         if(self.state == CPUState.PANIC) {
             //do nothing
         }
         else if(self.state == CPUState.RUNNING) {
-            //clear this flag, as handleInterrupt will only execute after the next op complete
-            self.interruptsJustEnabled = false;
+            //CPU is ahead of Motherboard -> wait
+            if(self.cycles > masterCycles){
+                return
+            }
+            
+            //there's an instruction to execute
+            if let instr = self.nextInstruction {
+                //clear this flag, as handleInterrupt will only execute after the next op complete
+                self.interruptsJustEnabled = false;
+                //resolve pending execution
+                self.execute(instruction: instr)
+                //ensure pending instruction will not re-execute
+                self.nextInstruction = nil
+                //check interrupt
+                self.tryHandleInterrupts()
+            }
             
             //fetch
             let opCodeInstr = self.fetch() //on real hardware fetch are done during last 4 cycles of previous instuction, but as cycles are incremented during execute, don't care
             //decode
             let instruction = self.decode(opCode:opCodeInstr.0,instr:opCodeInstr.1)
-            //execute
-            let duration = self.execute(instruction: instruction)
+            
+            //post pone execution
+            self.nextInstruction = instruction
             self.cycles = self.cycles &+ (self.willCycleOverhead(instruction) ? instruction.durationWithOverhead
                                                                               : instruction.duration)
             //print(self.registers.describe())
