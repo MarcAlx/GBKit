@@ -41,7 +41,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0x11, length: 3, name: "LD DE, 0x%04X", duration:12,ld_de_nn),
             Instruction(opCode: 0x12, length: 1, name: "LD (DE), A", duration:8,ld_dep_a),
             Instruction(opCode: 0x13, length: 1, name: "INC DE", duration:8,inc_de),
-            Instruction(opCode: 0x14, length: 1, name: "IND D", duration:4,inc_d),
+            Instruction(opCode: 0x14, length: 1, name: "INC D", duration:4,inc_d),
             Instruction(opCode: 0x15, length: 1, name: "DEC D", duration:4,dec_d),
             Instruction(opCode: 0x16, length: 2, name: "LD D, 0x%02X", duration:8,ld_d_n),
             Instruction(opCode: 0x17, length: 1, name: "RLA", duration:4,rla),
