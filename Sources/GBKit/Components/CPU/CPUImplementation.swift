@@ -53,7 +53,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0x1D, length: 1, name: "DEC E", duration:4,dec_e),
             Instruction(opCode: 0x1E, length: 2, name: "LD E, 0x%02X", duration:8,ld_e_n),
             Instruction(opCode: 0x1F, length: 1, name: "RRA", duration:4,rra),
-            Instruction(opCode: 0x20, length: 2, name: "JR NZ, 0x%02X", duration:12,jr_nz_i8),
+            Instruction(opCode: 0x20, length: 2, name: "JR NZ, 0x%02X", duration:8,jr_nz_i8, overhead: 4),
             Instruction(opCode: 0x21, length: 3, name: "LD HL, 0x%04X", duration:12,ld_hl_nn),
             Instruction(opCode: 0x22, length: 1, name: "LD (HL+), A", duration:8,ld_hlpi_a),
             Instruction(opCode: 0x23, length: 1, name: "INC HL", duration:8,inc_hl),
@@ -61,7 +61,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0x25, length: 1, name: "DEC H", duration:4,dec_h),
             Instruction(opCode: 0x26, length: 2, name: "LD H, 0x%02X", duration:8,ld_h_n),
             Instruction(opCode: 0x27, length: 1, name: "DAA", duration:4,daa),
-            Instruction(opCode: 0x28, length: 2, name: "JR Z, 0x%02X", duration:12,jr_z_i8),
+            Instruction(opCode: 0x28, length: 2, name: "JR Z, 0x%02X", duration:8,jr_z_i8, overhead: 4),
             Instruction(opCode: 0x29, length: 1, name: "ADD HL, HL", duration:8,add_hl_hl),
             Instruction(opCode: 0x2A, length: 1, name: "LD A, (HL+)", duration:8,ld_a_hlpi),
             Instruction(opCode: 0x2B, length: 1, name: "DEC HL", duration:8,dec_hl),
@@ -69,7 +69,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0x2D, length: 1, name: "DEC L", duration:4,dec_l),
             Instruction(opCode: 0x2E, length: 2, name: "LD L, 0x%02X", duration:8,ld_l_n),
             Instruction(opCode: 0x2F, length: 1, name: "CPL", duration:4,cpl),
-            Instruction(opCode: 0x30, length: 2, name: "JR NC, 0x%02X", duration:12,jr_nc_i8),
+            Instruction(opCode: 0x30, length: 2, name: "JR NC, 0x%02X", duration:8,jr_nc_i8, overhead: 4),
             Instruction(opCode: 0x31, length: 3, name: "LD SP, 0x%04X", duration:12,ld_sp_nn),
             Instruction(opCode: 0x32, length: 1, name: "LD (HL-), A", duration:8,ld_hlpd_a),
             Instruction(opCode: 0x33, length: 1, name: "INC SP", duration:8,inc_sp),
@@ -77,7 +77,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0x35, length: 1, name: "DEC (HL)", duration:12,dec_hlp),
             Instruction(opCode: 0x36, length: 2, name: "LD (HL), 0x%02X", duration:12,ld_hlp_n),
             Instruction(opCode: 0x37, length: 1, name: "SCF", duration:4,scf),
-            Instruction(opCode: 0x38, length: 2, name: "JR C, 0x%02X", duration:8,jr_c_i8),
+            Instruction(opCode: 0x38, length: 2, name: "JR C, 0x%02X", duration:8,jr_c_i8, overhead: 4),
             Instruction(opCode: 0x39, length: 1, name: "ADD HL, SP", duration:4,add_hl_sp),
             Instruction(opCode: 0x3A, length: 1, name: "LD A, (HL-)", duration:8,ld_a_hlpd),
             Instruction(opCode: 0x3B, length: 1, name: "DEC SP", duration:8,dec_sp),
@@ -213,35 +213,35 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0xBD, length: 1, name: "CP A, L", duration:4,cp_a_l),
             Instruction(opCode: 0xBE, length: 1, name: "CP A, (HL)", duration:8,cp_a_hlp),
             Instruction(opCode: 0xBF, length: 1, name: "CP A, A", duration:4,cp_a_a),
-            Instruction(opCode: 0xC0, length: 1, name: "RET NZ", duration:8,ret_nz),
+            Instruction(opCode: 0xC0, length: 1, name: "RET NZ", duration:8,ret_nz, overhead: 12),
             Instruction(opCode: 0xC1, length: 1, name: "POP BC", duration:12,pop_bc),
-            Instruction(opCode: 0xC2, length: 3, name: "JP NZ, 0x%04X", duration:12,jp_nz_nn),
+            Instruction(opCode: 0xC2, length: 3, name: "JP NZ, 0x%04X", duration:12,jp_nz_nn, overhead: 4),
             Instruction(opCode: 0xC3, length: 3, name: "JP 0x%04X", duration:16,jp_nn),
-            Instruction(opCode: 0xC4, length: 3, name: "CALL NZ, 0x%04X", duration:12,call_nz_nn),
+            Instruction(opCode: 0xC4, length: 3, name: "CALL NZ, 0x%04X", duration:12,call_nz_nn, overhead: 12),
             Instruction(opCode: 0xC5, length: 1, name: "PUSH BC", duration:16,push_bc),
             Instruction(opCode: 0xC6, length: 2, name: "ADD A, 0x%02X", duration:8,add_a_n),
             Instruction(opCode: 0xC7, length: 1, name: "RST 00h", duration:16,rst_00h),
-            Instruction(opCode: 0xC8, length: 1, name: "RET Z", duration:8,ret_z),
+            Instruction(opCode: 0xC8, length: 1, name: "RET Z", duration:8,ret_z, overhead: 12),
             Instruction(opCode: 0xC9, length: 1, name: "RET", duration:16,ret),
-            Instruction(opCode: 0xCA, length: 3, name: "JP Z, 0x%04X", duration:12,jp_z_nn),
+            Instruction(opCode: 0xCA, length: 3, name: "JP Z, 0x%04X", duration:12,jp_z_nn, overhead: 4),
             unsupported,//0xCB -> route to extended instruction set
-            Instruction(opCode: 0xCC, length: 3, name: "CALL Z, 0x%04X", duration:12,call_z_nn),
+            Instruction(opCode: 0xCC, length: 3, name: "CALL Z, 0x%04X", duration:12,call_z_nn, overhead: 12),
             Instruction(opCode: 0xCD, length: 3, name: "CALL 0x%04X", duration:24,call_nn),
             Instruction(opCode: 0xCE, length: 2, name: "ADC A, 0x%02X", duration:8,adc_a_n),
             Instruction(opCode: 0xCF, length: 1, name: "RST 08h", duration:16,rst_08h),
-            Instruction(opCode: 0xD0, length: 1, name: "RET NC", duration:8,ret_nc),
+            Instruction(opCode: 0xD0, length: 1, name: "RET NC", duration:8,ret_nc, overhead: 12),
             Instruction(opCode: 0xD1, length: 1, name: "POP DE", duration:12,pop_de),
-            Instruction(opCode: 0xD2, length: 3, name: "JP NC, 0x%04X", duration:12,jp_nc_nn),
+            Instruction(opCode: 0xD2, length: 3, name: "JP NC, 0x%04X", duration:12,jp_nc_nn, overhead: 4),
             unsupported,//0xD3
-            Instruction(opCode: 0xD4, length: 3, name: "CALL NC, 0x%04X", duration:12,call_nc_nn),
+            Instruction(opCode: 0xD4, length: 3, name: "CALL NC, 0x%04X", duration:12,call_nc_nn, overhead: 12),
             Instruction(opCode: 0xD5, length: 1, name: "PUSH DE", duration:16,push_de),
             Instruction(opCode: 0xD6, length: 2, name: "SUB A, 0x%02X", duration:8,sub_a_n),
             Instruction(opCode: 0xD7, length: 1, name: "RST 10h", duration:16,rst_10h),
-            Instruction(opCode: 0xD8, length: 1, name: "RET C", duration:8,ret_c),
+            Instruction(opCode: 0xD8, length: 1, name: "RET C", duration:8,ret_c, overhead: 12),
             Instruction(opCode: 0xD9, length: 1, name: "RETI", duration:16,reti),
-            Instruction(opCode: 0xDA, length: 3, name: "JP C, 0x%04X", duration:12,jp_c_nn),
+            Instruction(opCode: 0xDA, length: 3, name: "JP C, 0x%04X", duration:12,jp_c_nn, overhead: 4),
             unsupported,//0xDB
-            Instruction(opCode: 0xDC, length: 3, name: "CALL C, 0x%04X", duration:12,call_c_nn),
+            Instruction(opCode: 0xDC, length: 3, name: "CALL C, 0x%04X", duration:12,call_c_nn, overhead: 12),
             unsupported,//0xDD
             Instruction(opCode: 0xDE, length: 2, name: "SBC A, 0x%02X", duration:8,sbc_a_n),
             Instruction(opCode: 0xDF, length: 1, name: "RST 18h", duration:16,rst_18h),
@@ -761,21 +761,21 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func pop_bc() -> Void { self.registers.BC = self.popFromStack() }
     func jp_nz_nn(address:EnhancedShort) -> Void { jumpTo(address,.ZERO,inverseFlag: true) }
     func jp_nn(address:EnhancedShort) -> Void { jumpTo(address) }
-    func call_nz_nn(address:EnhancedShort) -> Void { self.call(address, .ZERO, inverseFlag: true, branchingCycleOverhead: 12) }
+    func call_nz_nn(address:EnhancedShort) -> Void { self.call(address, .ZERO, inverseFlag: true) }
     func push_bc() -> Void { self.pushToStack(self.registers.BC) }
     func add_a_n(val:Byte) -> Void { self.add_a(val) }
     func rst_00h() -> Void { self.call(ReservedMemoryLocationAddresses.RESTART_00.rawValue) }
     func ret_z() -> Void { self.retrn(.ZERO) }
     func ret() -> Void { self.retrn() }
     func jp_z_nn(address:EnhancedShort) -> Void { jumpTo(address,.ZERO) }
-    func call_z_nn(address:EnhancedShort) -> Void { self.call(address, .ZERO, inverseFlag: false, branchingCycleOverhead: 12) }
+    func call_z_nn(address:EnhancedShort) -> Void { self.call(address, .ZERO, inverseFlag: false) }
     func call_nn(address:EnhancedShort) -> Void { self.call(address) }
     func adc_a_n(val:Byte) -> Void { self.adc_a(val) }
     func rst_08h() -> Void { self.call(ReservedMemoryLocationAddresses.RESTART_08.rawValue) }
     func ret_nc() -> Void { self.retrn(.CARRY, inverseFlag: true) }
     func pop_de() -> Void { self.registers.DE = self.popFromStack() }
     func jp_nc_nn(address:EnhancedShort) -> Void { jumpTo(address,.CARRY,inverseFlag: true) }
-    func call_nc_nn(address:EnhancedShort) -> Void { self.call(address, .CARRY, inverseFlag: true, branchingCycleOverhead: 12) }
+    func call_nc_nn(address:EnhancedShort) -> Void { self.call(address, .CARRY, inverseFlag: true) }
     func push_de() -> Void { self.pushToStack(self.registers.DE) }
     func sub_a_n(val:Byte) -> Void { self.sub_a(val) }
     func rst_10h() -> Void { self.call(ReservedMemoryLocationAddresses.RESTART_10.rawValue) }
@@ -785,7 +785,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
         self.e_i(false); /*reti enable directly*/
     }
     func jp_c_nn(address:EnhancedShort) -> Void { jumpTo(address,.CARRY) }
-    func call_c_nn(address:EnhancedShort) -> Void { self.call(address, .CARRY, inverseFlag: false, branchingCycleOverhead: 12) }
+    func call_c_nn(address:EnhancedShort) -> Void { self.call(address, .CARRY, inverseFlag: false) }
     func sbc_a_n(val:Byte) -> Void { self.sbc_a(val) }
     func rst_18h() -> Void { self.call(ReservedMemoryLocationAddresses.RESTART_18.rawValue) }
     func ld_ff00pn_a(val:Byte) -> Void { mmu.write(address: 0xFF00+UInt16(val), val: self.registers.A) }

@@ -55,35 +55,47 @@ struct Instruction {
     /// in M cycle
     let duration:Int
     
+    /// overhead introduce by branching
+    let durationOverhead:Int
+    
+    /// duration with overhead applied
+    var durationWithOverhead:Int {
+        duration + durationOverhead
+    }
+    
     public init(length: InstructionLength,
                 name: String,
                 duration:Int,
-                _ impl:OneByteInstruction?) {
-        self.init(opCode: nil, length: length, name: name, duration: duration,impl1:impl)
+                _ impl:OneByteInstruction?,
+                overhead:Int = 0) {
+        self.init(opCode: nil, length: length, name: name, duration: duration,impl1:impl, durationOverhead: overhead)
     }
     
     public init(opCode: Byte,
                 length: InstructionLength,
                 name: String,
                 duration:Int,
-                _ impl:OneByteInstruction? = nil) {
-        self.init(opCode: opCode, length: length, name: name, duration: duration,impl1:impl)
+                _ impl:OneByteInstruction? = nil,
+                overhead:Int = 0) {
+        self.init(opCode: opCode, length: length, name: name, duration: duration,impl1:impl, durationOverhead: overhead)
     }
     
     public init(opCode: Byte,
                 length: InstructionLength,
                 name: String,
                 duration:Int,
-                _ impl:TwoBytesInstruction? = nil) {
-        self.init(opCode: opCode, length: length, name: name, duration: duration,impl2:impl)
+                _ impl:TwoBytesInstruction? = nil,
+                overhead:Int = 0) {
+        self.init(opCode: opCode, length: length, name: name, duration: duration,impl2:impl, durationOverhead: overhead)
     }
     
     public init(opCode: Byte,
                 length: InstructionLength,
                 name: String,
                 duration:Int,
-                _ impl:ThreeBytesInstruction? = nil) {
-        self.init(opCode: opCode, length: length, name: name, duration: duration,impl3:impl)
+                _ impl:ThreeBytesInstruction? = nil,
+                overhead:Int = 0) {
+        self.init(opCode: opCode, length: length, name: name, duration: duration,impl3:impl, durationOverhead: overhead)
     }
     
     private init(opCode: Byte?,
@@ -92,7 +104,8 @@ struct Instruction {
                  duration:Int,
                  impl1:OneByteInstruction? = nil,
                  impl2:TwoBytesInstruction? = nil,
-                 impl3:ThreeBytesInstruction? = nil) {
+                 impl3:ThreeBytesInstruction? = nil,
+                 durationOverhead:Int = 0) {
         self.opCode = opCode
         self.length = length
         self.name = name
@@ -100,6 +113,7 @@ struct Instruction {
         self.impl1 = impl1 ?? emptyOneByteInstruction
         self.impl2 = impl2 ?? emptyTwoBytesInstruction
         self.impl3 = impl3 ?? emptyThreeBytesInstruction
+        self.durationOverhead = durationOverhead
     }
     
     /// execute the instruction as a one byte instruction (does nothing if not of the correct size)

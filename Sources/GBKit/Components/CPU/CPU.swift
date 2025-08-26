@@ -59,19 +59,11 @@ public class CPU: CPUImplementation, Clockable {
                 let instruction = self.decode(opCode:opCodeInstr.0,instr:opCodeInstr.1)
                 //store next execute to resolve only when timing has passed
                 self.nextInstruction = instruction
-                self.whenToExecuteNextInstruction = self.cycles &+ instruction.duration
+                self.whenToExecuteNextInstruction = self.cycles &+ (self.willCycleOverhead(instruction) ? instruction.durationWithOverhead
+                                                                                                        : instruction.duration)
                 self.nextInstructionHasBeenDecoded = true
                 
-                //n.b the following also works, but CPU state is effective before timing resolve, so postpone via nextInstruction mechanism
-                //
-                //  let duration = self.execute(instruction: instruction)
-                //  self.cycles = self.cycles &+ duration
-                //
-                // in this case you need to keepup with master timing before doing anything via (put at start of tick)
-                //
-                // if(self.cycles > masterCycles) {
-                //     return
-                // }
+                //n.b doing fetch, decode, execute in classical way also works, but CPU state is effective before timing resolve, so postpone via nextInstruction mechanism
             }
             
             self.cycles = self.cycles &+ GBConstants.MCycleLength

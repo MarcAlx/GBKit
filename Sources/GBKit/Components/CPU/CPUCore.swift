@@ -202,12 +202,49 @@ public class CPUCore: Component {
         self.registers.conditionalSet(cond: self.registers.A == 0, flag: .ZERO)
     }
     
-    /// jump to address, any provided flag is checked in order to conditionnaly jump, (if so a cycle overhead is applied by default 4), if inverseFlag is true flag are checked at inverse
-    internal func jumpTo(_ address:EnhancedShort, _ flag:CPUFlag, inverseFlag:Bool = false, _ branchingCycleOverhead:Int = 4) {
+    /// returns true if intruction executed now will introduce a cycle overhead
+    internal func willCycleOverhead(_ intruction:Instruction) -> Bool{
+        //C
+        if(intruction.opCode == 0x38
+        || intruction.opCode == 0xD8
+        || intruction.opCode == 0xDA
+        || intruction.opCode == 0xDC)
+        {
+            return self.registers.isFlagSet(.CARRY)
+        }
+        //Z
+        else if(intruction.opCode == 0x28
+             || intruction.opCode == 0xC8
+             || intruction.opCode == 0xCA
+             || intruction.opCode == 0xCC)
+        {
+            return self.registers.isFlagSet(.ZERO)
+        }
+        //NC
+        else if(intruction.opCode == 0x30
+             || intruction.opCode == 0xD0
+             || intruction.opCode == 0xD2
+             || intruction.opCode == 0xD4)
+        {
+            return !self.registers.isFlagSet(.CARRY)
+        }
+        //NZ
+        else if(intruction.opCode == 0x20
+             || intruction.opCode == 0xC0
+             || intruction.opCode == 0xC2
+             || intruction.opCode == 0xC4)
+        {
+            return !self.registers.isFlagSet(.ZERO)
+        }
+        // other function has no overhead
+        return false
+    }
+    
+    /// jump to address, any provided flag is checked in order to conditionnaly jump, if inverseFlag is true flag are checked at inverse
+    internal func jumpTo(_ address:EnhancedShort, _ flag:CPUFlag, inverseFlag:Bool = false) {
         if((!inverseFlag &&  self.registers.isFlagSet(flag))
         ||  (inverseFlag && !self.registers.isFlagSet(flag))) {
             self.jumpTo(address)
-            self.cycles += branchingCycleOverhead // jumping with condition implies some extra cycles
         }
         else {
             // all provided flag are not raised, do nothing
@@ -219,11 +256,11 @@ public class CPUCore: Component {
         self.registers.PC = address.value
     }
     
-    /// jump relative by val, any provided flag is checked in order to conditionnaly jump, (if so a cycle overhead is applied by default +4)
-    internal func jumpRelative(_ val:Byte, _ flag:CPUFlag, inverseFlag:Bool = false, branchingCycleOverhead:Int = 4) {
+    /// jump relative by val, any provided flag is checked in order to conditionnaly jump
+    internal func jumpRelative(_ val:Byte, _ flag:CPUFlag, inverseFlag:Bool = false) {
         let res = add_short_i8(val: self.registers.PC, i8: val)
         //a relative jump is just an absolute jump from PC
-        self.jumpTo(EnhancedShort(res), flag, inverseFlag: inverseFlag, branchingCycleOverhead)
+        self.jumpTo(EnhancedShort(res), flag, inverseFlag: inverseFlag)
     }
     
     /// perform a relative jump
@@ -235,9 +272,9 @@ public class CPUCore: Component {
     }
     
     /// call according to condition (flag)
-    internal func call(_ address:EnhancedShort, _ flag:CPUFlag, inverseFlag:Bool = false, branchingCycleOverhead:Int = 4) {
+    internal func call(_ address:EnhancedShort, _ flag:CPUFlag, inverseFlag:Bool = false) {
         let oldPC = self.registers.PC
-        self.jumpTo(address, flag, inverseFlag: inverseFlag, branchingCycleOverhead)
+        self.jumpTo(address, flag, inverseFlag: inverseFlag)
         //branching has succeed write PC
         if(oldPC != self.registers.PC) {
             self.pushToStack(oldPC)
@@ -269,10 +306,10 @@ public class CPUCore: Component {
         self.registers.clearFlags(.NEGATIVE,.HALF_CARRY,.CARRY)
     }
     
-    /// return by taking care of flags, if any flag branching occurs a cycle overhead of +12 is applied
+    /// return by taking care of flags
     internal func retrn(_ flag:CPUFlag, inverseFlag:Bool = false) {
         let oldPC = self.registers.PC
-        self.jumpTo(EnhancedShort(self.readFromStack()), flag, inverseFlag: inverseFlag, 12)
+        self.jumpTo(EnhancedShort(self.readFromStack()), flag, inverseFlag: inverseFlag)
         if(oldPC != self.registers.PC){
             self.retrn()
         }
