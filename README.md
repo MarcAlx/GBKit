@@ -6,7 +6,7 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 **Status** Games that don't need MBC supports or advance CPU tricks work, e.g Tetris, Tennis...
 
-**Work in progress** (still under active development, MBC under development) (ETA: when its done!). For now limited to GB, GBC support planned.
+**Under active development** (MBC support on the way!, ETA: when its done!). For now limited to GB, GBC support planned.
 
 ## Miletones
 
