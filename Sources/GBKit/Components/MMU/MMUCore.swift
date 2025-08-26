@@ -83,6 +83,9 @@ public class MMUCore:Component, Clockable {
                 }
             case IOAddresses.LCD_STATUS.rawValue:
                 return self.ram[address] | 0b1000_0000 //bit 7 is always 1
+            //Gameboy doctor
+            case IOAddresses.LCD_LY.rawValue:
+                return 0x90
             //DIV is mapped to internal div counter
             case IOAddresses.DIV.rawValue:
                 return self.internalDivCounterAsByte
