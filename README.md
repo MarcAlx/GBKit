@@ -109,7 +109,7 @@ Passing:
   - 02-wrtie_timing.gb
   - 03-modify_timing.gb
 
-  n.b requires CPU to decompose its instruction to reflect mmu state
+  n.b requires CPU to decompose its instruction to reflect mmu state (see wip on branch `/dev/mmu-timings`)
 
  #### APU
 
