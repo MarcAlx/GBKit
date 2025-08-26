@@ -27,7 +27,7 @@ public class CPU: CPUImplementation, Clockable {
     }
     
     public func tick(_ masterCycles:Int, _ frameCycles:Int) {
-        //as cycles are incremented during execute, keep up with motherboard before doing the next instruction
+        //as cycles are incremented after execute, keep up with motherboard before doing the next instruction
         if(self.cycles > masterCycles) {
             return
         }
