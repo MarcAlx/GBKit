@@ -278,7 +278,7 @@ public class CPUCore: Component {
         }
     }
     
-    /// return by taking care of flags, if any flag branching occurs a cycle overhead of +12 is applied
+    /// direct return
     internal func retrn() {
         self.registers.PC = self.popFromStack()
     }
