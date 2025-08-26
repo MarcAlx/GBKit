@@ -78,7 +78,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
             Instruction(opCode: 0x36, length: 2, name: "LD (HL), 0x%02X", duration:12,ld_hlp_n),
             Instruction(opCode: 0x37, length: 1, name: "SCF", duration:4,scf),
             Instruction(opCode: 0x38, length: 2, name: "JR C, 0x%02X", duration:8,jr_c_i8, overhead: 4),
-            Instruction(opCode: 0x39, length: 1, name: "ADD HL, SP", duration:4,add_hl_sp),
+            Instruction(opCode: 0x39, length: 1, name: "ADD HL, SP", duration:8,add_hl_sp),
             Instruction(opCode: 0x3A, length: 1, name: "LD A, (HL-)", duration:8,ld_a_hlpd),
             Instruction(opCode: 0x3B, length: 1, name: "DEC SP", duration:8,dec_sp),
             Instruction(opCode: 0x3C, length: 1, name: "INC A", duration:4,inc_a),
