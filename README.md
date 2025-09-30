@@ -12,7 +12,7 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 - (Done) CPU
 - (Done) PPU
-- (Done, not 100% accurate) APU
+- (Done, not all obscure behaviors implemented) APU
 - (In development) MBC handling
 - (TODO) Finish unit tests
 - (Next) Move from `XCTest` to new Swift `Testing`
