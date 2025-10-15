@@ -58,7 +58,10 @@ public struct GameBoyConstants {
     public let FrameDuration:Float
 
     //Ram size
-    public let RAMSize:Int = 0xFFFF+1
+    public let RAMSize:Int = MMUAddressSpaces.RAM.count
+    
+    //Ram size
+    public let ExternalRAMSize:Int = MMUAddressSpaces.EXTERNAL_RAM_BANK.count
 
     //opcode to lookup for extended instructions
     public let ExtendedInstructionSetOpcode:Byte = 0xCB
@@ -534,8 +537,10 @@ enum MMUAddresses:Short {
 public enum MMUAddressSpaces {
     //n.b enum doesn't support ClosedRange<Int> but using static let does the tricks
     
+    static let RAM:ClosedRange<Short> = MMUAddresses.CARTRIDGE_BANK0.rawValue...MMUAddresses.INTERRUPT_ENABLE_REGISTER.rawValue
     static let CARTRIDGE_BANK0:ClosedRange<Short> = MMUAddresses.CARTRIDGE_BANK0.rawValue...MMUAddresses.CARTRIDGE_BANK0_END.rawValue
     static let CARTRIDGE_SWITCHABLE_BANK:ClosedRange<Short> = MMUAddresses.CARTRIDGE_SWITCHABLE_BANK.rawValue...MMUAddresses.CARTRIDGE_SWITCHABLE_BANK_END.rawValue
+    static let CARTRIDGE_ROM = CARTRIDGE_BANK0.lowerBound...CARTRIDGE_SWITCHABLE_BANK.upperBound
     static let VIDEO_RAM:ClosedRange<Short> = MMUAddresses.VIDEO_RAM.rawValue...MMUAddresses.VIDEO_RAM_END.rawValue
     static let EXTERNAL_RAM_BANK:ClosedRange<Short> = MMUAddresses.EXTERNAL_RAM_BANK.rawValue...MMUAddresses.EXTERNAL_RAM_BANK_END.rawValue
     static let WORK_RAM = MMUAddresses.WORK_RAM.rawValue...MMUAddresses.WORK_RAM_END.rawValue
