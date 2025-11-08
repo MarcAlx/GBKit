@@ -70,6 +70,10 @@ public class Motherboard: Clockable {
                 tmpCycles += GBConstants.MCycleLength
             }
         }
+        else {
+            //flush ppu to ensure empty buffer is ok
+            self.ppu.flush()
+        }
     }
 }
 
