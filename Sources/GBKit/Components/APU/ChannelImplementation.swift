@@ -8,14 +8,14 @@ public class AudioChannel: CoreAudioChannel {
         }
     }
     
-    // mark: Clockable
+    // MARK: Clockable
     
     public var cycles: Int = 0
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
         self.cycles = self.cycles &+ GBConstants.MCycleLength
     }
     
-    // mark: CoreAudioChannel
+    // MARK: CoreAudioChannel
     var apuProxy:APUProxy? = nil
     public func registerAPU(apu: APUProxy) {
         self.apuProxy = apu
@@ -143,7 +143,7 @@ public class AudioChannel: CoreAudioChannel {
         return 0
     }
     
-    // mark: Component
+    // MARK: Component
     public func reset(){
         self.lengthTimer    = 0x0
         self.frequency      = 0x0

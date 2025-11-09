@@ -348,7 +348,7 @@ public class APU: Component, Clockable, APUProxy {
         return pow(GBConstants.APUHighPassFilterDefaultCharge, Float(GBConstants.CPUSpeed) / Float(configuration.sampleRate))
     }
     
-    /// mark: APUProxy
+    // MARK: APUProxy
 
     public var isAPUEnabled: Bool {
         get {

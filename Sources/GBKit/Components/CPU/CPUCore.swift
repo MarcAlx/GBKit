@@ -39,7 +39,7 @@ public class CPUCore: Component {
         GBErrorService.report(error: errors.unsupportedInstruction(opCode:(true, opCode) ,fountAt:pc))
     }
     
-    /// - mark : underlaying intructions
+    // MARK: - underlaying intructions
     
     /// handle interrupt
     internal func handleInterrupt(_ interrupt:InterruptFlag,_ interruptLoc:Short) {
@@ -425,7 +425,7 @@ public class CPUCore: Component {
         self.registers.raiseFlag(.HALF_CARRY)
     }
     
-    // mark : stack related
+    // MARK: stack related
     /// read a short from stack
     internal func readFromStack() -> Short {
         return self.mmu.read(address: self.registers.SP)
