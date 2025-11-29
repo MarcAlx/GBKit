@@ -229,10 +229,15 @@ public class CPUCore: Component {
         }
     }
     
+    /// true if flag is set in registers (or not set if inverseflag
+    internal func checkFlag(_ flag:CPUFlag, _ inverseFlag:Bool = false) -> Bool {
+        return (!inverseFlag &&  self.registers.isFlagSet(flag))
+            ||  (inverseFlag && !self.registers.isFlagSet(flag))
+    }
+    
     /// jump to address, any provided flag is checked in order to conditionnaly jump, if inverseFlag is true flag are checked at inverse
     internal func jumpTo(_ address:EnhancedShort, _ flag:CPUFlag, inverseFlag:Bool = false) {
-        if((!inverseFlag &&  self.registers.isFlagSet(flag))
-        ||  (inverseFlag && !self.registers.isFlagSet(flag))) {
+        if(checkFlag(flag, inverseFlag)) {
             self.jumpTo(address)
         }
         else {
@@ -295,11 +300,9 @@ public class CPUCore: Component {
         self.registers.clearFlags(.NEGATIVE,.HALF_CARRY,.CARRY)
     }
     
-    /// return by taking care of flags
+    /// return by taking care of flag
     internal func retrn(_ flag:CPUFlag, inverseFlag:Bool = false) {
-        let oldPC = self.registers.PC
-        self.jumpTo(EnhancedShort(self.readFromStack()), flag, inverseFlag: inverseFlag)
-        if(oldPC != self.registers.PC){
+        if(checkFlag(flag, inverseFlag)){
             self.retrn()
         }
     }
