@@ -617,7 +617,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
     override public func tick(_ masterCycles: Int, _ frameCycles: Int) {
         if(self.frequencyTimer == 0){
             //reload noise timer
-            self.frequencyTimer = (Short(self.clockDivisor << self.clockShift))
+            self.frequencyTimer = (Short(Short(self.clockDivisor) << self.clockShift))
             //compute LFSR bit to apply (Not XOR between bit 0 and 1)
             let xor:Short = ~(((self.LFSR & 0b10) >> 1) ^ (self.LFSR & 0b01))
             //store xor at corresponding bit according to noise width
