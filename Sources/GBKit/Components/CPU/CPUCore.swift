@@ -429,13 +429,16 @@ public class CPUCore: Component {
     // MARK: stack related
     /// read a short from stack
     internal func readFromStack() -> Short {
-        return self.mmu.read(address: self.registers.SP)
+        //stack works at the oposite of ram msb wrote first lsb next
+        let lsb: Byte = self.mmu.read(address: self.registers.SP)
+        let msb: Byte = self.mmu.read(address: self.registers.SP &+ 1)
+        return merge(msb, lsb)
     }
     
     /// read a byte from stack along with PC increment
     internal func popFromStack() -> Short {
-        let res:Short = self.mmu.read(address: self.registers.SP)
-        self.registers.SP += 2
+        let res = self.readFromStack()
+        self.registers.SP = self.registers.SP &+ 2
         return res
     }
     
@@ -446,7 +449,10 @@ public class CPUCore: Component {
     
     /// write a short to stack along with PC decrements
     internal func writeToStack(_ val:EnhancedShort) -> Void {
-        self.registers.SP -= 2
-        self.mmu.write(address: self.registers.SP, val: val)
+        //stack works at the oposite of ram msb wrote first lsb next
+        self.registers.SP = self.registers.SP &- 1
+        self.mmu.write(address: self.registers.SP, val: val.msb)
+        self.registers.SP = self.registers.SP &- 1
+        self.mmu.write(address: self.registers.SP, val: val.lsb)
     }
 }
