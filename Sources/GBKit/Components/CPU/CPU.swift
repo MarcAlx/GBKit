@@ -72,19 +72,19 @@ public class CPU: CPUImplementation, Clockable {
         //execute
         switch(instruction.length) {
         case InstructionLength.OneByte:
-            //LogService.log(LogCategory.CPU,"; \(instruction.name)")
+            //GBLogService.log(LogCategory.CPU,"; \(instruction.name)")
             instruction.execute()
             break
         case InstructionLength.TwoBytes:
             let arg = self.readIncrPC()
-            //LogService.log(LogCategory.CPU,"; \(String(format: instruction.name, arg))")
+            //GBLogService.log(LogCategory.CPU,"; \(String(format: instruction.name, arg))")
             instruction.execute(arg)
             break
         case InstructionLength.ThreeBytes:
             let lsb = self.readIncrPC()
             let msb = self.readIncrPC()
             let arg = EnhancedShort(lsb,msb)
-            //LogService.log(LogCategory.CPU,"; \(String(format: instruction.name, arg.value))")
+            //GBLogService.log(LogCategory.CPU,"; \(String(format: instruction.name, arg.value))")
             instruction.execute(arg)
             break
         }
