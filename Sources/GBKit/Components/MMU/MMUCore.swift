@@ -67,6 +67,10 @@ public class MMUCore:Component, Clockable {
             }
             
             switch address {
+            case MMUAddressSpaces.CARTRIDGE_ROM:
+                return self.currentCartridge[address]
+            case MMUAddressSpaces.EXTERNAL_RAM_BANK:
+                return self.currentCartridge[address]
             case IOAddresses.JOYPAD_INPUT.rawValue:
                 let joy1 = self.ram[address]
                 //buttons
@@ -139,12 +143,10 @@ public class MMUCore:Component, Clockable {
             //prohibited area cannot be set
             case MMUAddressSpaces.PROHIBITED_AREA:
                 break
-            //bank 0 is read only
-            case MMUAddressSpaces.CARTRIDGE_BANK0:
-                break
-            //switchable bank, switch bank on write
-            case MMUAddressSpaces.CARTRIDGE_SWITCHABLE_BANK:
-                break//TODO bank switch on write
+            case MMUAddressSpaces.CARTRIDGE_ROM:
+                self.currentCartridge[address] = newValue
+            case MMUAddressSpaces.EXTERNAL_RAM_BANK:
+                self.currentCartridge[address] = newValue
             //joy pad is not fully W
             case IOAddresses.JOYPAD_INPUT.rawValue:
                 //programs often write to 0xFF00 to debounce keys, be sure that the readonly part is not erased in this process.
@@ -212,8 +214,6 @@ public class MMUCore:Component, Clockable {
     /// load cartridge inside MMU, n.b it's not done like that in reality
     public func loadCartridge(cartridge:Cartridge){
         self.currentCartridge = cartridge
-        self.ram.load(bank: cartridge.banks[0], at: Int(MMUAddresses.CARTRIDGE_BANK0.rawValue))
-        self.ram.load(bank: cartridge.banks[1], at: Int(MMUAddresses.CARTRIDGE_SWITCHABLE_BANK.rawValue))
     }
     
     public func reset() {

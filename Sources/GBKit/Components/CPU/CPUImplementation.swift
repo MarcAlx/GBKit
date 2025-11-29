@@ -542,7 +542,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     }
     
     
-    // mark: standard instructions set
+    // MARK: standard instructions set
     
     // n.b if behavior differs from doc, read CPU manual to understand expected behavior
     
@@ -813,7 +813,7 @@ public class CPUImplementation: CPUCore, GameBoyInstructionSet {
     func cp_a_n(val:Byte) -> Void { self.cp_a(val) }
     func rst_38h() -> Void { self.call(ReservedMemoryLocationAddresses.RESTART_38.rawValue) }
     
-    // mark: extended instruction set
+    // MARK: extended instruction set
     func rlc_b() -> Void { self.registers.B = self.rl(self.registers.B, circular: true) }
     func rlc_c() -> Void { self.registers.C = self.rl(self.registers.C, circular: true) }
     func rlc_d() -> Void { self.registers.D = self.rl(self.registers.D, circular: true) }

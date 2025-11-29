@@ -3,35 +3,45 @@ import Foundation
 public class Cartridge: Describable {
     
     private var source:Data = Data()
-    private var _data:[Byte] = []
-    var data:[Byte] {
+    private var data:[Byte] = []
+    
+    public subscript(address:Short) -> Byte {
         get {
-            return self._data
+            self.bankController[address]
+        }
+        set {
+            self.bankController[address] =  newValue
         }
     }
     
-    var banks:[MemoryBank] = []
-    
     ///headers of the cartridge read from ROM
     public private(set) var headers:CartridgeHeader = CartridgeHeader()
+    
+    public private(set) var bankController:MBC = MBC(type: .ROM_ONLY, banks: [], externalRAM:[])
     
     public init() {}
     
     ///init cartridge from ROM data
     public init(data:Data) throws {
         self.source = data
-        self._data = self.source.toArray()
-        self.headers = try CartridgeHeader(cartridgeData: self._data)
-        self.initBanks()
+        self.data = self.source.toArray()
+        self.headers = try CartridgeHeader(cartridgeData: self.data)
+        let banks = self.buildROMBanks()
+        let ram = (0..<self.headers.nbBankInRAM).map { i in
+            MemoryBank(size: GBConstants.RAMBankSize * 1024, name: "external ram \(i)")
+        }
+        self.bankController = MBC(type: self.headers.cartridgeType, banks: banks, externalRAM: ram)
     }
     
     /// init banks from data
-    private func initBanks() {
+    private func buildROMBanks() -> [MemoryBank] {
+        var banks:[MemoryBank] = []
         for i in 0..<self.headers.nbBankInROM {
             let from = i * GBConstants.ROMBankSizeInBytes
             let to   = (i+1) * GBConstants.ROMBankSizeInBytes
-            self.banks.append(MemoryBank(data:Array(self.data[from..<to])))
+            banks.append(MemoryBank(data:Array(self.data[from..<to])))
         }
+        return banks;
     }
     
     public func describe() -> String {

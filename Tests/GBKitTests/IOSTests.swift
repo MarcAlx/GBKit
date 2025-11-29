@@ -12,7 +12,7 @@ final class IOSTests: XCTestCase {
     }
     
     func test_lcdstat() throws {
-        let ios:IOInterface = MMU()
+        let ios:MMU = MMU()
         
         ios.setLCDStatFlag(.HBlankInterruptSource, enabled: true)
         XCTAssertTrue(ios.readLCDStatFlag(.HBlankInterruptSource))
@@ -45,7 +45,7 @@ final class IOSTests: XCTestCase {
     
     func test_lcdcontrol() throws {
         let mmu:MMU = MMU()
-        let ios:IOInterface = mmu
+        let ios:MMU = mmu
         
         mmu[IOAddresses.LCD_CONTROL.rawValue] = 0x0
         ios.setLCDControlFlag(.BG_AND_WINDOW_ENABLE, enabled: true)

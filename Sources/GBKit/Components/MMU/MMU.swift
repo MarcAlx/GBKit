@@ -20,7 +20,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
         self.fillWithInitialValues()
     }
     
-    // mark: InterruptsControlInterface
+    // MARK: InterruptsControlInterface
     
     public var IME:Bool {
         get {
@@ -67,7 +67,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
         return (self.IF & interrupt.rawValue) > 0
     }
     
-    // mark: IOInterface
+    // MARK: IOInterface
     
     // fill MMU with initial value
     public func fillWithInitialValues() {
@@ -209,7 +209,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
         self.setLCDStatFlag(.LYCeqLY, enabled: newVal == self[IOAddresses.LCD_LY.rawValue])
     }
     
-    // mark: TimerInterface
+    // MARK: TimerInterface
     public var INTERNAL_DIV_COUNTER: Short {
         set {
             self.internalDivCounter = newValue
@@ -246,7 +246,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
         }
     }
     
-    // mark: JoypadInterface
+    // MARK: JoypadInterface
     
     public var DPAD_STATE: Byte {
         get {
@@ -266,7 +266,7 @@ public class MMU: MMUCore, InterruptsControlInterface,
         }
     }
     
-    // mark: AudioInterface
+    // MARK: AudioInterface
 
     public func getAPUChannelPanning() -> (CH4_L:Bool,
                                            CH3_L:Bool,

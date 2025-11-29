@@ -98,11 +98,12 @@ public class PPU: Component, Clockable {
         self.lineSync = 0
         self.windowLineCounter = 0
         self._frameBuffer = self.configuration.emptyFrameBuffer
+        self.commitFrame()
         ios.writeLCDStatMode(.HBLANK)
     }
     
     public func flush(){
-        self.nextFrame = PPU.blankFrame
+        self.nextFrame = self.configuration.emptyFrameBuffer
         self.commitFrame()
     }
     
@@ -292,7 +293,7 @@ public class PPU: Component, Clockable {
                                                                          range: tileMap))
                 
                 //depending on tileDataFlag, tileindex must be considered as a signed Int8 or a Byte
-                let effectiveTileIndex:Byte = tileDataFlag ? tileIndex : add_byte_i8(val: 128, i8: tileIndex)
+                let effectiveTileIndex:Int = tileDataFlag ? Int(tileIndex) : 128 + Int(Int8(bitPattern: tileIndex))
                 
                 //get tile starting address from tile index
                 let tileAddress:Short = self.getAddressAt(index: Short(effectiveTileIndex) * Short(GBConstants.TileLength),

@@ -8,14 +8,14 @@ public class AudioChannel: CoreAudioChannel {
         }
     }
     
-    // mark: Clockable
+    // MARK: Clockable
     
     public var cycles: Int = 0
     public func tick(_ masterCycles: Int, _ frameCycles: Int) {
         self.cycles = self.cycles &+ GBConstants.MCycleLength
     }
     
-    // mark: CoreAudioChannel
+    // MARK: CoreAudioChannel
     var apuProxy:APUProxy? = nil
     public func registerAPU(apu: APUProxy) {
         self.apuProxy = apu
@@ -143,7 +143,7 @@ public class AudioChannel: CoreAudioChannel {
         return 0
     }
     
-    // mark: Component
+    // MARK: Component
     public func reset(){
         self.lengthTimer    = 0x0
         self.frequency      = 0x0
@@ -617,7 +617,7 @@ public class Noise: AudioChannelWithEnvelope, NoiseChannel {
     override public func tick(_ masterCycles: Int, _ frameCycles: Int) {
         if(self.frequencyTimer == 0){
             //reload noise timer
-            self.frequencyTimer = (Short(self.clockDivisor << self.clockShift))
+            self.frequencyTimer = (Short(Short(self.clockDivisor) << self.clockShift))
             //compute LFSR bit to apply (Not XOR between bit 0 and 1)
             let xor:Short = ~(((self.LFSR & 0b10) >> 1) ^ (self.LFSR & 0b01))
             //store xor at corresponding bit according to noise width

@@ -39,7 +39,7 @@ public class CPUCore: Component {
         GBErrorService.report(error: errors.unsupportedInstruction(opCode:(true, opCode) ,fountAt:pc))
     }
     
-    /// - mark : underlaying intructions
+    // MARK: - underlaying intructions
     
     /// handle interrupt
     internal func handleInterrupt(_ interrupt:InterruptFlag,_ interruptLoc:Short) {
@@ -59,7 +59,8 @@ public class CPUCore: Component {
     
     /// true if any interrupt is pending
     internal var hasAnyInterruptPending:Bool {
-        self.interrupts.IE > 0 && self.interrupts.IF > 0
+           (self.interrupts.IE & 0b0001_1111) > 0
+        && (self.interrupts.IF & 0b0001_1111) > 0
     }
     
     /// add val to HL, assign flag and return val
@@ -228,10 +229,15 @@ public class CPUCore: Component {
         }
     }
     
+    /// true if flag is set in registers (or not set if inverseflag
+    internal func checkFlag(_ flag:CPUFlag, _ inverseFlag:Bool = false) -> Bool {
+        return (!inverseFlag &&  self.registers.isFlagSet(flag))
+            ||  (inverseFlag && !self.registers.isFlagSet(flag))
+    }
+    
     /// jump to address, any provided flag is checked in order to conditionnaly jump, if inverseFlag is true flag are checked at inverse
     internal func jumpTo(_ address:EnhancedShort, _ flag:CPUFlag, inverseFlag:Bool = false) {
-        if((!inverseFlag &&  self.registers.isFlagSet(flag))
-        ||  (inverseFlag && !self.registers.isFlagSet(flag))) {
+        if(checkFlag(flag, inverseFlag)) {
             self.jumpTo(address)
         }
         else {
@@ -294,11 +300,9 @@ public class CPUCore: Component {
         self.registers.clearFlags(.NEGATIVE,.HALF_CARRY,.CARRY)
     }
     
-    /// return by taking care of flags
+    /// return by taking care of flag
     internal func retrn(_ flag:CPUFlag, inverseFlag:Bool = false) {
-        let oldPC = self.registers.PC
-        self.jumpTo(EnhancedShort(self.readFromStack()), flag, inverseFlag: inverseFlag)
-        if(oldPC != self.registers.PC){
+        if(checkFlag(flag, inverseFlag)){
             self.retrn()
         }
     }
@@ -425,16 +429,19 @@ public class CPUCore: Component {
         self.registers.raiseFlag(.HALF_CARRY)
     }
     
-    // mark : stack related
+    // MARK: stack related
     /// read a short from stack
     internal func readFromStack() -> Short {
-        return self.mmu.read(address: self.registers.SP)
+        //stack works at the oposite of ram msb wrote first lsb next
+        let lsb: Byte = self.mmu.read(address: self.registers.SP)
+        let msb: Byte = self.mmu.read(address: self.registers.SP &+ 1)
+        return merge(msb, lsb)
     }
     
     /// read a byte from stack along with PC increment
     internal func popFromStack() -> Short {
-        let res:Short = self.mmu.read(address: self.registers.SP)
-        self.registers.SP += 2
+        let res = self.readFromStack()
+        self.registers.SP = self.registers.SP &+ 2
         return res
     }
     
@@ -445,7 +452,10 @@ public class CPUCore: Component {
     
     /// write a short to stack along with PC decrements
     internal func writeToStack(_ val:EnhancedShort) -> Void {
-        self.registers.SP -= 2
-        self.mmu.write(address: self.registers.SP, val: val)
+        //stack works at the oposite of ram msb wrote first lsb next
+        self.registers.SP = self.registers.SP &- 1
+        self.mmu.write(address: self.registers.SP, val: val.msb)
+        self.registers.SP = self.registers.SP &- 1
+        self.mmu.write(address: self.registers.SP, val: val.lsb)
     }
 }
