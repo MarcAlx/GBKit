@@ -17,7 +17,7 @@ public class Cartridge: Describable {
     ///headers of the cartridge read from ROM
     public private(set) var headers:CartridgeHeader = CartridgeHeader()
     
-    public private(set) var bankController:MBC = MBC(type: .ROM_ONLY, banks: [])
+    public private(set) var bankController:MBC = MBC(type: .ROM_ONLY, banks: [], externalRAM:[])
     
     public init() {}
     
@@ -26,12 +26,15 @@ public class Cartridge: Describable {
         self.source = data
         self.data = self.source.toArray()
         self.headers = try CartridgeHeader(cartridgeData: self.data)
-        let banks = self.buildBanks()
-        self.bankController = MBC(type: self.headers.cartridgeType, banks: banks)
+        let banks = self.buildROMBanks()
+        let ram = (0..<self.headers.nbBankInRAM).map { i in
+            MemoryBank(size: GBConstants.RAMBankSize * 1024, name: "external ram \(i)")
+        }
+        self.bankController = MBC(type: self.headers.cartridgeType, banks: banks, externalRAM: ram)
     }
     
     /// init banks from data
-    private func buildBanks() -> [MemoryBank] {
+    private func buildROMBanks() -> [MemoryBank] {
         var banks:[MemoryBank] = []
         for i in 0..<self.headers.nbBankInROM {
             let from = i * GBConstants.ROMBankSizeInBytes

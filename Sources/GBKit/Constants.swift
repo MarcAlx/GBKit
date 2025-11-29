@@ -565,6 +565,14 @@ public enum MMUAddressSpaces {
     static let OBJ_TILE_DATA_AREA:ClosedRange<Short> = 0x8000...0x8FFF
 }
 
+/// to control banking
+public enum MBCControlAddressSpaces {
+    static let RAM_ENABLE:ClosedRange<Short> = 0x0000...0x1FFF
+    static let ROM_BANK_SELECT:ClosedRange<Short> = 0x2000...0x3FFF
+    static let RAM_BANK_SELECT:ClosedRange<Short> = 0x4000...0x5FFF
+    static let BANKING_MODE_SELECT:ClosedRange<Short> = 0x6000...0x7FFF
+}
+
 /// same as MMUAddressSpaces but with ClosedRange<Int>
 public enum MMUAddressSpacesInt {
     static let OBJECT_ATTRIBUTE_MEMORY:ClosedRange<Int> = Int(MMUAddresses.OBJECT_ATTRIBUTE_MEMORY.rawValue)...Int(MMUAddresses.OBJECT_ATTRIBUTE_MEMORY_END.rawValue)
