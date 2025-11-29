@@ -224,6 +224,7 @@ This project contains some unit tests, objective is to test each core fonction o
 - [Nitty Gritty Gameboy Cycle Timing.txt](http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt)
 - [TLMBoy: The Audio Processing Unit (APU) - Square Channel](https://www.chciken.com/tlmboy/2025/03/28/gameboy-apu-square.html)
 - [TLMBoy: The Audio Processing Unit (APU) - Noise Channel](https://www.chciken.com/tlmboy/2025/03/24/gameboy-apu-noise.html)
+- [More than you wanted to know about how Game Boy cartridges work](https://abc.decontextualize.com/more-than-you-wanted-to-know/)
 
 
 ### forums / threads / questions
