@@ -14,7 +14,7 @@ final class CPUExtendedInstructionsTests: XCTestCase {
     func test_indexation() throws {
         let cpu:CPU = CPU(mmu: MMU())
         
-        let inst = cpu.asExtentedInstructions()
+        let inst = cpu.extendedInstructionSet
         for i in 0...255 {
             XCTAssertTrue(Byte(i) == inst[i].opCode)
         }
