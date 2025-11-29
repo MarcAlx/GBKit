@@ -59,7 +59,8 @@ public class CPUCore: Component {
     
     /// true if any interrupt is pending
     internal var hasAnyInterruptPending:Bool {
-        self.interrupts.IE > 0 && self.interrupts.IF > 0
+           (self.interrupts.IE & 0b0001_1111) > 0
+        && (self.interrupts.IF & 0b0001_1111) > 0
     }
     
     /// add val to HL, assign flag and return val
