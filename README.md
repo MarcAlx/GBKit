@@ -4,19 +4,19 @@ Swift package that provides emulation back-end to make your own Game Boy emulato
 
 Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
-**Status** Games that don't need MBC supports or advance CPU tricks work, e.g Tetris, Tennis...
+**Status** Games that don't supports or advance CPU tricks works, e.g Super Mario Land, Kirby Dream Land, Tetris, Tennis, F1 Race...
 
-**Under active development** (MBC support on the way!, ETA: when its done!). For now limited to GB, GBC support planned.
+**Under active development** (MBC-2-3-4-5 support on the way!, ETA: when its done!). For now limited to GB, GBC support planned.
 
 ## Miletones
 
-- (Done) CPU
-- (Done) PPU
-- (Done, not all obscure behaviors implemented) APU
-- (In development) MBC handling
-- (TODO) Finish unit tests
-- (Next) Move from `XCTest` to new Swift `Testing`
-- (Later) GBC Support
+- CPU (Done)
+- PPU (Done)
+- APU (Done, not all obscure behaviors implemented)
+- MBC handling (No MBC and MBC1: OK, MBC-2-3-4-5 in development)
+- Finish unit tests (TODO)
+- Move from `XCTest` to new Swift `Testing` (Next) 
+- GBC Support (Later)
 
 ## Architecture
 
@@ -95,6 +95,8 @@ Passing:
  - 09-op r,r.gb
  - 10-bit ops.gb
  - 11-op a,(hl).gb
+ 
+ - aging.gb
 
  #### PPU
 
@@ -106,7 +108,7 @@ Passing:
 
   Non passing:
   - 01-read_timing.gb
-  - 02-wrtie_timing.gb
+  - 02-write_timing.gb
   - 03-modify_timing.gb
 
   n.b requires CPU to decompose its instruction to reflect mmu state (see wip on branch `/dev/mmu-timings`)
