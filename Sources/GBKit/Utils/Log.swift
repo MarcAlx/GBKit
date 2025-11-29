@@ -30,7 +30,7 @@ public class LoggingService {
     public var gbLogger:GBLogger?
 
     ///log message with the provided category with a given loglevel
-    public func log(level:LogLevel,_ category:LogCategory, _ msg:String) {
+    public func log(level:LogLevel,_ category:LogCategory, _ msg:String, _ withConsole:Bool = false) {
         let logger:Logger = self.loggers[category] != nil ? self.loggers[category]! : Logger(subsystem: subsystem, category: category.rawValue)
         switch(level) {
         case LogLevel.Debug:
@@ -43,7 +43,9 @@ public class LoggingService {
         //log to system logger
         let fMsg:String = "[\(level.rawValue)] \(category.rawValue) - \(msg)"
         //to console
-        print(fMsg)
+        if(withConsole) {
+            print(fMsg)
+        }
         //log to view model if any
         self.gbLogger?.log(fMsg)
     }
