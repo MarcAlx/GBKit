@@ -6,7 +6,7 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
 **Status** Games that don't rely on advance CPU tricks or MBC special feature works, e.g Super Mario Land, Kirby Dream Land, Tetris, Tennis, F1 Race, Pokémon...
 
-**Under active development** (full MBC-2-3-5-6-7 support on the way! now limited to RAM feaute, ETA: when its done!). For now limited to GB, GBC support planned.
+**Under active development** (full MBC-2-3-5-6-7 support on the way! now limited to RAM feature, ETA: when its done!). For now limited to GB, GBC support planned.
 
 ## Miletones
 
