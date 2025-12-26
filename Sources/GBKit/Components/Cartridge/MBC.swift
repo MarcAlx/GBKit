@@ -138,42 +138,81 @@ public class MBC: Component {
     
     /// handle write to rom, mainly switchable bank control
     private func handleROMWrite(addr:Short, val:Byte){
-        switch addr {
-        case MBCControlAddressSpaces.RAM_ENABLE:
-            //writing A in lsb should enable ram
-            self.ramEnabled = (val & 0xA) > 0
-            break
-        case MBCControlAddressSpaces.ROM_BANK_SELECT:
-            var bank = Int(val & 0b0001_1111)
-            //0 should map to 1
-            if (bank == 0) {
-                bank = 1
+        if(self.type == .MBC1
+        || self.type == .MBC1_RAM
+        || self.type == .MBC1_RAM_BATTERY) {
+            switch addr {
+            case MBCControlAddressSpaces.MBC1_RAM_ENABLE:
+                //writing A in lsb should enable ram
+                self.ramEnabled = (val & 0xA) > 0
+                break
+            case MBCControlAddressSpaces.MBC1_ROM_BANK_SELECT:
+                //switch
+                self.switchableROMBankIndex = self.getBankIndex(fromVal: val, mask: 0b0001_1111, nbOfBanks: self.banks.count)
+                break;
+            case MBCControlAddressSpaces.MBC1_RAM_BANK_SELECT:
+                //only first 2 bits matter
+                let bits2Keep = (val & 0b0000_0011)
+                
+                if(self.bankingMode == MBCBankingMode.SIMPLE){
+                    //in simple mode, the 2 bits mean upper bits of rom bank index
+                    self.switchableROMBankIndex = self.switchableROMBankIndex | Int((bits2Keep << 5))
+                }
+                else if(self.bankingMode == MBCBankingMode.ADVANCED){
+                    //in advanced mode, the 2 bits mean RAM bank index
+                    self.switchableRAMBankIndex = Int(bits2Keep)
+                }
+                
+                break;
+            case MBCControlAddressSpaces.MBC1_BANKING_MODE_SELECT:
+                self.bankingMode = MBCBankingMode(rawValue:(0b0000_0001 & val))!
+                break;
+            default:
+                break
             }
-            //avoid OOB
-            bank = bank % self.banks.count
-            //switch
-            self.switchableROMBankIndex = bank
-            break;
-        case MBCControlAddressSpaces.RAM_BANK_SELECT:
-            //only first 2 bits matter
-            let bits2Keep = (val & 0b0000_0011)
-            
-            if(self.bankingMode == MBCBankingMode.SIMPLE){
-                //in simple mode, the 2 bits mean upper bits of rom bank index
-                self.switchableROMBankIndex = self.switchableROMBankIndex | Int((bits2Keep << 5))
-            }
-            else if(self.bankingMode == MBCBankingMode.ADVANCED){
-                //in advanced mode, the 2 bits mean RAM bank index
-                self.switchableRAMBankIndex = Int(bits2Keep)
-            }
-            
-            break;
-        case MBCControlAddressSpaces.BANKING_MODE_SELECT:
-            self.bankingMode = MBCBankingMode(rawValue:(0b0000_0001 & val))!
-            break;
-        default:
-            break
         }
+        else if(self.type == .MBC3
+             || self.type == .MBC3_RAM
+             || self.type == .MBC3_RAM_BATTERY
+             || self.type == .MBC3_TIMER_BATTERY
+             || self.type == .MBC3_TIMER_RAM_BATTERY) {
+            switch addr {
+            case MBCControlAddressSpaces.MBC3_RAM_TIMER_ENABLE:
+                //writing A in lsb should enable ram
+                self.ramEnabled = (val & 0x0F) == 0x0A
+                
+                //TODO RTC
+                break
+            case MBCControlAddressSpaces.MBC3_ROM_BANK_SELECT:
+                //switch
+                self.switchableROMBankIndex = self.getBankIndex(fromVal: val, mask: 0b0111_1111, nbOfBanks: self.banks.count)
+                break;
+            case MBCControlAddressSpaces.MBC3_RAM_BANK_RTC_REG_SELECT:
+                if (0x00...0x03).contains(val) {
+                    self.switchableRAMBankIndex = Int(val)
+                }
+                else if (0x08...0x0C).contains(val) {
+                    //TODO RTC
+                }
+            case MBCControlAddressSpaces.MBC3_LATCH_LOCK:
+                //TODO RTC
+                break
+            default:
+                break;
+            }
+        }
+    }
+    
+    /// determine bank index from a byte value,  a range of byte to consider and a number of banks
+    private func getBankIndex(fromVal:Byte, mask:Byte, nbOfBanks:Int) -> Int {
+        var bank = Int(fromVal & mask)
+        //0 should map to 1
+        if (bank == 0) {
+            bank = 1
+        }
+        //avoid OOB
+        bank = bank % nbOfBanks
+        return bank
     }
     
     public func reset() {
