@@ -201,6 +201,40 @@ public class MBC: Component {
                 break;
             }
         }
+        else if(self.type == .MBC5
+             || self.type == .MBC5_RAM
+             || self.type == .MBC5_RAM_BATTERY
+             || self.type == .MBC5_RUMBLE
+             || self.type == .MBC5_RUMBLE_RAM
+             || self.type == .MBC5_RUMBLE_RAM_BATTERY) {
+            switch addr {
+            case MBCControlAddressSpaces.MBC5_RAM_ENABLE:
+                //writing A in lsb should enable ram
+                self.ramEnabled = (val & 0x0F) == 0x0A
+                break
+            case MBCControlAddressSpaces.MBC5_ROM_BANK_LOW:
+                //switch
+                self.switchableROMBankIndex = Int(val)
+                break;
+            case MBCControlAddressSpaces.MBC5_ROM_BANK_HIGH:
+                //add 9th bit
+                self.switchableROMBankIndex = (((Int(val) & 0b0000_0001) << 8) | (self.switchableROMBankIndex & 0xFF))
+                if banks.count > 0 {
+                    self.switchableROMBankIndex %= banks.count
+                }
+                break;
+            case MBCControlAddressSpaces.MBC5_RAM_BANK_SELECT:
+                if (0x00...0x0F).contains(val) {
+                    let bank = Int(val)
+                    if bank < self.externalRAM.count {
+                        self.switchableRAMBankIndex = bank
+                    }
+                }
+                break
+            default:
+                break;
+            }
+        }
     }
     
     /// determine bank index from a byte value,  a range of byte to consider and a number of banks

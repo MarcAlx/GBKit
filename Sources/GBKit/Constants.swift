@@ -575,6 +575,10 @@ public enum MBCControlAddressSpaces {
     static let MBC3_ROM_BANK_SELECT:ClosedRange<Short> = 0x2000...0x3FFF
     static let MBC3_RAM_BANK_RTC_REG_SELECT:ClosedRange<Short> = 0x4000...0x5FFF
     static let MBC3_LATCH_LOCK:ClosedRange<Short> = 0x6000...0x7FFF
+    static let MBC5_RAM_ENABLE:ClosedRange<Short> = 0x0000...0x1FFF
+    static let MBC5_ROM_BANK_LOW:ClosedRange<Short> = 0x2000...0x2FFF
+    static let MBC5_ROM_BANK_HIGH:ClosedRange<Short> = 0x3000...0x3FFF
+    static let MBC5_RAM_BANK_SELECT:ClosedRange<Short> = 0x4000...0x5FFF
 }
 
 /// same as MMUAddressSpaces but with ClosedRange<Int>
