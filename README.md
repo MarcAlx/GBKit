@@ -4,16 +4,16 @@ Swift package that provides emulation back-end to make your own Game Boy emulato
 
 Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 
-**Status** Games that don't rely on advance CPU tricks or MBC-2-3-4-5 work, e.g Super Mario Land, Kirby Dream Land, Tetris, Tennis, F1 Race...
+**Status** Games that don't rely on advance CPU tricks or MBC special feature works, e.g Super Mario Land, Kirby Dream Land, Tetris, Tennis, F1 Race, Pokémon...
 
-**Under active development** (MBC-2-3-4-5 support on the way!, ETA: when its done!). For now limited to GB, GBC support planned.
+**Under active development** (full MBC-2-3-5-6-7 support on the way! now limited to RAM feaute, ETA: when its done!). For now limited to GB, GBC support planned.
 
 ## Miletones
 
 - CPU (Done)
 - PPU (Done)
 - APU (Done, not all obscure behaviors implemented)
-- MBC handling (No MBC and MBC1: OK, MBC-2-3-4-5 in development)
+- MBC handling (No MBC and MBC1: OK, MBC3 && MBC5 ROM/RAM Ok, full MBC-2-3-5-6-7 support in development)
 - Finish unit tests (TODO)
 - Move from `XCTest` to new Swift `Testing` (Next) 
 - GBC Support (Later)
