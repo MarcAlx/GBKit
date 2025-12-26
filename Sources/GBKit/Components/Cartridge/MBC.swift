@@ -121,7 +121,7 @@ public class MBC: Component {
                 self.handleROMWrite(addr: address, val: newValue)
                 break
             case MMUAddressSpaces.EXTERNAL_RAM_BANK:
-            //TODO handle external ram bank write
+                self.externalRAM[self.switchableRAMBankIndex][address-0xA000] = newValue
                 break
             default:
                 break
