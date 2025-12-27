@@ -107,7 +107,12 @@ public class MBC: Component {
                 return self.banks[self.switchableROMBankIndex][address-0x4000]
             case MMUAddressSpaces.EXTERNAL_RAM_BANK:
                 if(self.ramEnabled){
-                    return self.externalRAM[self.switchableRAMBankIndex][address-0xA000]
+                    if(self.type != .MBC2 && self.type != .MBC2_BATTERY){
+                        return self.externalRAM[self.switchableRAMBankIndex][address-0xA000]
+                    }
+                    else {
+                        return self.externalRAM[self.switchableRAMBankIndex][address & 0x01FF] | 0xF0
+                    }
                 }
                 return 0xFF
             default:
@@ -122,7 +127,12 @@ public class MBC: Component {
                 break
             case MMUAddressSpaces.EXTERNAL_RAM_BANK:
                 if(self.ramEnabled){
-                    self.externalRAM[self.switchableRAMBankIndex][address-0xA000] = newValue
+                    if(self.type != .MBC2 && self.type != .MBC2_BATTERY){
+                        self.externalRAM[self.switchableRAMBankIndex][address-0xA000] = newValue
+                    }
+                    else {
+                        self.externalRAM[self.switchableRAMBankIndex][address & 0x01FF] = newValue & 0xF
+                    }
                 }
                 break
             default:
@@ -171,6 +181,16 @@ public class MBC: Component {
                 break;
             default:
                 break
+            }
+        }
+        else if(self.type == .MBC2
+             || self.type == .MBC2_BATTERY) {
+            if(isBitSet(ShortMask.Bit_8, addr)){
+                self.switchableROMBankIndex = self.getBankIndex(fromVal: val, mask: 0b0000_1111, nbOfBanks: self.banks.count)
+            }
+            else {
+                self.ramEnabled = (val & 0xF) == 0x0A
+                self.switchableRAMBankIndex = 0
             }
         }
         else if(self.type == .MBC3

@@ -27,10 +27,12 @@ public class Cartridge: Describable {
         self.data = self.source.toArray()
         self.headers = try CartridgeHeader(cartridgeData: self.data)
         let banks = self.buildROMBanks()
+        
+        let isMBC2 = (self.headers.cartridgeType == .MBC2 || self.headers.cartridgeType == .MBC2_BATTERY)
         let ram = (0..<self.headers.nbBankInRAM).map { i in
             MemoryBank(size: GBConstants.RAMBankSize * 1024, name: "external ram \(i)")
         }
-        self.bankController = MBC(type: self.headers.cartridgeType, banks: banks, externalRAM: ram)
+        self.bankController = MBC(type: self.headers.cartridgeType, banks: banks, externalRAM: !isMBC2 ? ram : [MemoryBank(size: GBConstants.RAMBankSize * 1024, name: "external ram")])
     }
     
     /// init banks from data
