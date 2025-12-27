@@ -13,10 +13,52 @@ Here's a simple emulator (front-end) usage : https://github.com/MarcAlx/gb
 - CPU (Done)
 - PPU (Done)
 - APU (Done, not all obscure behaviors implemented)
-- MBC handling (No MBC and MBC1: OK, MBC3 && MBC5 ROM/RAM Ok, full MBC-2-3-5-6-7 support in development)
+- MBC handling (No MBC and MBC1: OK, MBC2,MBC3, MBC5 ROM/RAM Ok, full MBC-2-3-5-6-7 support in development, see status table below)
 - Finish unit tests (TODO)
 - Move from `XCTest` to new Swift `Testing` (Next) 
 - GBC Support (Later)
+
+<details>
+
+<summary>MBC support status</summary>
+
+
+**Statuses:** _🟢 supported, 🟠 partial support,  🔴 unsupported (todo), ✕ unconcerned_
+
+| Cartridge type | MBC/Feature                    |ROM banking| RAM | Battery | RTC | Rumble | Status | Game example |
+|----------------|--------------------------------|- |-----|---------|-----|--------|--------|----|
+| 0x00           | ROM_ONLY                       | ✕ | ✕   | ✕       | ✕   | ✕      | 🟢      | Tetris |
+| 0x01           | MBC1                           | 🟢 | ✕   | ✕       | ✕   | ✕      | 🟢      | Super Mario Land |
+| 0x02           | MBC1_RAM                       | 🟢 | 🟢  | ✕       | ✕   | ✕      | 🟢      | 
+| 0x03           | MBC1_RAM_BATTERY               | 🟢 | 🟢  | 🔴      | ✕   | ✕      | 🟠      |
+| 0x05           | MBC2                           | 🟢 | ✕   | ✕       | ✕   | ✕      | 🟢      | F1 Race |
+| 0x06           | MBC2_BATTERY                   | 🟢 | 🟢  | 🔴      | ✕   | ✕      | 🟠      | F1 Race |
+| 0x08           | ROM_RAM                        | 🔴 | 🔴  | ✕       | ✕   | ✕      | 🔴      |
+| 0x09           | ROM_RAM_BATTERY                | 🔴 | 🔴  | 🔴      | ✕   | ✕      | 🔴      |
+| 0x0B           | MMM01                          | 🔴 | ✕   | ✕       | ✕   | ✕      | 🔴      |
+| 0x0C           | MMM01_RAM                      | 🔴 | 🔴  | ✕       | ✕   | ✕      | 🔴      |
+| 0x0D           | MMM01_RAM_BATTERY              | 🔴 | 🔴  | 🔴      | ✕   | ✕      | 🔴      |
+| 0x0F           | MBC3_TIMER_BATTERY             | 🟢 | ✕   | 🔴      | 🔴  | ✕      | 🟠      |
+| 0x10           | MBC3_TIMER_RAM_BATTERY         | 🟢 | 🟢  | 🔴      | 🔴  | ✕      | 🟠      |
+| 0x11           | MBC3                           | 🟢 | ✕   | ✕       | ✕   | ✕      | 🟢      | Pokémon Red (JP) |
+| 0x12           | MBC3_RAM                       | 🟢 | 🟢  | ✕       | ✕   | ✕      | 🟢      | Pokémon Red (JP) |
+| 0x13           | MBC3_RAM_BATTERY               | 🟢 | 🟢  | 🔴      | ✕   | ✕      | 🟠      | Pokémon Red (JP) |
+| 0x19           | MBC5                           | 🟢 | ✕   | ✕       | ✕   | ✕      | 🟢      | Pokémon Red (EU) |
+| 0x1A           | MBC5_RAM                       | 🟢 | 🟢  | ✕       | ✕   | ✕      | 🟢      | Pokémon Red (EU) | 
+| 0x1B           | MBC5_RAM_BATTERY               | 🟢 | 🟢  | 🔴      | ✕   | ✕      | 🟠      | Pokémon Red (EU) |
+| 0x1C           | MBC5_RUMBLE                    | 🟢 | ✕   | ✕       | ✕   | 🔴     | 🟠      |
+| 0x1D           | MBC5_RUMBLE_RAM                | 🟢 | 🟢  | ✕       | ✕   | 🔴     | 🟠      |
+| 0x1E           | MBC5_RUMBLE_RAM_BATTERY        | 🟢 | 🟢  | 🔴      | ✕   | 🔴     | 🟠      |
+| 0x20           | MBC6                           | 🔴 | ✕   | ✕       | ✕   | ✕      | 🔴      |
+| 0x22           | MBC7_SENSOR_RUMBLE_RAM_BATTERY | 🔴 | 🔴  | 🔴      | ✕   | ✕      | 🔴      |
+| 0xFC           | POCKET_CAMERA                  | 🔴 | 🔴  | 🔴      | ✕   | ✕      | 🔴      |
+| 0xFD           | BANDAI_TAMA5                   | ✕  | ✕   | ✕       | ✕   | ✕      | 🟢      |
+| 0xFE           | HuC3                           |  🔴  | 🔴  | 🔴      | 🔴  | ✕     | 🔴      |
+| 0xFF           | HuC1_RAM_BATTERY               |  🔴 | 🔴  | 🔴      | ✕   | ✕     | 🔴      |
+
+[Useful list of game by MBC](https://gbhwdb.gekkio.fi/cartridges/gb.html)
+
+</details>
 
 ## Architecture
 
