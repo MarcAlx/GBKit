@@ -92,10 +92,10 @@ public class MBC: Component {
     }
     
     /// index of the bank to use for switachble area
-    private var switchableROMBankIndex:Int = 1
+    private var switchableROMBankIndex:Int = 0
     
     /// index of the external ram bank to use for switachble area
-    private var switchableRAMBankIndex:Int = 1
+    private var switchableRAMBankIndex:Int = 0
     
     ///the mapper itself, dispatch R/W to correct cartridge banks
     public subscript(address:Short) -> Byte {
