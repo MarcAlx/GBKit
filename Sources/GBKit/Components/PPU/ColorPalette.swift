@@ -19,7 +19,7 @@ public struct Color {
     }
 }
 
-/// a color palette, made of three colors
+/// a color palette, made of four colors
 public struct ColorPalette {
     private var values:[Color]
     

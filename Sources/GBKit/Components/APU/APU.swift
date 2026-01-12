@@ -318,8 +318,8 @@ public class APU: Component, Clockable, APUProxy {
         }
         
         //return sample by applying master volume
-        // divide each sample             by 4, as we have summed up all 4 channel amplitudes
-        // divide volume multiplied value by 7, as volume is stored on 3 bits (max value = 0b111 -> 7)
+        // divide each sample                by 4, as we have summed up all 4 channel amplitudes
+        // divide multiplied by volume value by 7, as volume is stored on 3 bits (max value = 0b111 -> 7)
         return (L: ((leftSample  / 4.0) * Float(volume.L)) / 7.0,
                 R: ((rightSample / 4.0) * Float(volume.R)) / 7.0)
     }
